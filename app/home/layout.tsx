@@ -1,9 +1,14 @@
 "use client"
 
+// Components
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuSeparator, DropdownMenuItem } from "@/components/ui/dropdown-menu";
+
+// Icons
 import { Crown, LogOut, Moon, Plus, Sun, User } from "lucide-react";
+
+// Hooks
 import { useTheme } from "next-themes";
 
 export default function HomeLayout({
@@ -19,19 +24,21 @@ export default function HomeLayout({
 
     return (
         <div className="w-full h-screen flex flex-col">
+
             {/* header */}
             <div className="w-full flex justify-between items-center p-4 border-b border-border">
-                <h1 className="text-2xl font-bold font-mono">E-Auction</h1>
+                <h1 className="text-2xl font-bold font-mono">e-Auction</h1>
                 <div className="flex items-center gap-2">
                     <Button variant="default">
                         <Plus />
-                        Create Auction
+                        <span className="hidden md:block">Create Auction</span>
+                        <span className="block md:hidden">New</span>
                     </Button>
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button variant="outline">
                                 <User />
-                                John Doe
+                                <span className="hidden md:block">Guilherme Müller</span>
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
@@ -65,8 +72,9 @@ export default function HomeLayout({
                     </DropdownMenu>
                 </div>
             </div>
+
             {/* main */}
-            <main className="flex-1 overflow-y-auto p-4">
+            <main className="flex-1 w-full h-full overflow-y-auto p-4 max-w-7xl mx-auto">
                 {children}
             </main>
         </div>
