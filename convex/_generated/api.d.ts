@@ -19,6 +19,7 @@ import type * as bids from "../bids.js";
 import type * as crons from "../crons.js";
 import type * as http from "../http.js";
 import type * as items from "../items.js";
+import type * as notifications from "../notifications.js";
 import type * as realtime from "../realtime.js";
 import type * as router from "../router.js";
 import type * as seed from "../seed.js";
@@ -38,6 +39,7 @@ declare const fullApi: ApiFromModules<{
   crons: typeof crons;
   http: typeof http;
   items: typeof items;
+  notifications: typeof notifications;
   realtime: typeof realtime;
   router: typeof router;
   seed: typeof seed;
