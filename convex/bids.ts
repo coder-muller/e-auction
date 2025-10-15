@@ -3,7 +3,7 @@ import { v } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { paginationOptsValidator } from "convex/server";
 import { createNotification } from "./notifications";
-import { internal } from "./_generated/api";
+import { api, internal } from "./_generated/api";
 
 export const placeBid = mutation({
     args: {
@@ -92,6 +92,10 @@ export const placeBid = mutation({
             lastBidderId: userId,
             expiringAt: newExpiringAt,
         });
+
+        await ctx.runMutation(api.watchlist.addToWatchlist, {
+            itemId: data.itemId
+        })
 
         return { success: true, bidId, message: "Bid placed successfully" };
     },

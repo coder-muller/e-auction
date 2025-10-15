@@ -23,6 +23,7 @@ import type * as notifications from "../notifications.js";
 import type * as realtime from "../realtime.js";
 import type * as router from "../router.js";
 import type * as seed from "../seed.js";
+import type * as watchlist from "../watchlist.js";
 
 /**
  * A utility for referencing Convex functions in your app's API.
@@ -43,6 +44,7 @@ declare const fullApi: ApiFromModules<{
   realtime: typeof realtime;
   router: typeof router;
   seed: typeof seed;
+  watchlist: typeof watchlist;
 }>;
 export declare const api: FilterApi<
   typeof fullApi,

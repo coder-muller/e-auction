@@ -57,7 +57,15 @@ const applicationTables = {
         .index("byItem", ["itemId"])
         .index("byType", ["type"])
         .index("byFromUserId", ["fromUserId"])
-        .index("byToUserId", ["toUserId"])
+        .index("byToUserId", ["toUserId"]),
+    users: defineTable({
+        name: v.string(),
+        email: v.optional(v.string()),
+        phone: v.optional(v.string()),
+        document: v.optional(v.string()),
+        items: v.array(v.id("items")),
+        watchlist: v.array(v.id("items"))
+    })
 };
 
 export default defineSchema({
