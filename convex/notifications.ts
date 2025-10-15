@@ -7,7 +7,8 @@ export const createNotification = internalMutation({
         type: v.union(
             v.literal("outbid"),
             v.literal("newBid"),
-            v.literal("itemSold"),
+            v.literal("itemSoldSeller"),
+            v.literal("itemSoldBidder"),
             v.literal("endingSoon")
         ),
         fromUserId: v.optional(v.id("users")),

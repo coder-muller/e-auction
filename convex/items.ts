@@ -2,6 +2,7 @@ import { query, mutation, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { paginationOptsValidator } from "convex/server";
+import { internal } from "./_generated/api";
 
 export const list = query({
     args: {
@@ -146,6 +147,19 @@ export const endAuction = internalMutation({
                 status: "pending",
             });
 
+            await ctx.runMutation(internal.notifications.createNotification, {
+                type: "itemSoldSeller",
+                fromUserId: item.lastBidderId,
+                toUserId: item.sellerId,
+                itemId: args.itemId
+            })
+
+            await ctx.runMutation(internal.notifications.createNotification, {
+                type: "itemSoldBidder",
+                fromUserId: item.sellerId,
+                toUserId: item.lastBidderId,
+                itemId: args.itemId
+            })
         }
 
         await ctx.db.patch(args.itemId, updates);
