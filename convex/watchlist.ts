@@ -53,3 +53,22 @@ export const getWatchlist = query({
         return items
     }
 })
+
+export const removeFromWatchList = mutation({
+    args: {
+        itemId: v.id("items")
+    },
+    handler: async (ctx, args) => {
+        const userId = await getAuthUserId(ctx)
+        if (!userId) throw new ConvexError("Unauthorized")
+
+        const user = await ctx.db.get(userId)
+        if (!user) throw new ConvexError("User not found")
+
+        const newWatchlist = user.watchlist.filter(id => id !== args.itemId)
+
+        await ctx.db.patch(userId, {
+            watchlist: newWatchlist
+        })
+    }
+})
