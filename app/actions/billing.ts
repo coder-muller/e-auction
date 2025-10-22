@@ -15,9 +15,11 @@ interface Billing {
         email: string
         taxId: string // cpf/cnpj do comprador
     }
+    /*
     recipient: {
-
+        // TODO: add recipient
     }
+    */
     externalId: string // _id da transaction no convex
 }
 
