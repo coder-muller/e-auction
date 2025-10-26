@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
-import { Header } from "@/components/header";
+import { Toaster } from "@/components/ui/sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "e-Auction",
-  description: "e-Auction, the best way to buy and sell products!",
+  description: "e-Auction, a melhor plataforma de leilões online!",
 };
 
 export default function RootLayout({
@@ -30,12 +30,8 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <div className="w-full h-screen flex flex-col">
-            <Header />
-            <main className="flex-1 w-full h-full overflow-y-auto p-4 max-w-7xl mx-auto">
-              {children}
-            </main>
-          </div>
+          {children}
+          <Toaster richColors />
         </ThemeProvider>
       </body>
     </html>

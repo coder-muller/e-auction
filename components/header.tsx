@@ -13,6 +13,7 @@ import { Sun } from "lucide-react";
 import { Moon } from "lucide-react";
 import { User } from "lucide-react";
 import { useTheme } from "next-themes";
+import Link from "next/link";
 
 export function Header() {
     const { setTheme, theme } = useTheme();
@@ -23,9 +24,10 @@ export function Header() {
 
     return (
         <div className="w-full flex justify-between items-center p-4 border-b border-border">
-            <h1 className="text-2xl font-bold font-mono">e-Auction</h1>
+            <Link href="/">
+                <h1 className="text-2xl font-bold font-mono">e-Auction</h1>
+            </Link>
             <div className="flex items-center gap-2">
-
                 <Popover>
                     <PopoverTrigger asChild>
                         <Button variant="ghost">
