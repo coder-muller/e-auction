@@ -6,8 +6,9 @@ import { Input } from "@/components/ui/input";
 import { ArrowLeft, TriangleAlert } from "lucide-react";
 import Link from "next/link";
 import { useEffect, use, useState } from "react";
-import { auctions } from "@/lib/fake-data";
+import { auctions, vendors, bidHistory } from "@/lib/fake-data";
 import Image from "next/image";
+import { Star, User } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -43,6 +44,61 @@ function CountdownTimer({ endTime }: { endTime: Date }) {
 
     return <span className="font-mono">{timeLeft}</span>;
 }
+
+const VendorInfo = ({ vendorId }: { vendorId: number }) => {
+    const vendor = vendors[vendorId as keyof typeof vendors];
+    if (!vendor) return null;
+
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                    <User className="size-5" />
+                    Vendedor
+                </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+                <div className="flex items-center justify-between">
+                    <span className="font-medium">{vendor.name}</span>
+                    <div className="flex items-center gap-1">
+                        <Star className="size-4 fill-yellow-400 text-yellow-400" />
+                        <span className="text-sm">{vendor.rating}</span>
+                    </div>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                    {vendor.totalSales} vendas realizadas
+                </p>
+            </CardContent>
+        </Card>
+    );
+};
+
+const BidHistory = ({ auctionId }: { auctionId: number }) => {
+    const bids = bidHistory[auctionId as keyof typeof bidHistory] || [];
+
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle>Maiores Lances</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <div className="space-y-3">
+                    {bids.map((bid, index) => (
+                        <div key={index} className="flex items-center justify-between">
+                            <div>
+                                <p className="font-medium text-sm">{bid.bidder}</p>
+                                <p className="text-xs text-muted-foreground">{bid.time}</p>
+                            </div>
+                            <span className="font-semibold">
+                                {bid.amount.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+                            </span>
+                        </div>
+                    ))}
+                </div>
+            </CardContent>
+        </Card>
+    );
+};
 
 interface AuctionPageProps {
     params: Promise<{
@@ -132,18 +188,29 @@ export default function AuctionPage({ params }: AuctionPageProps) {
                     </CardContent>
                 </Card>
 
-                {/* Bid Form */}
-                <Card className="col-span-1">
-                    <CardHeader>
-                        <CardTitle className="text-xl font-semibold">Dê um lance</CardTitle>
-                        <CardDescription>
-                            Crie um lance para este leilão.
-                        </CardDescription>
+                {/* Sidebar */}
+                <div className="col-span-1 space-y-4">
+                    {/* Bid Form */}
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="text-xl font-semibold">Dê um lance</CardTitle>
+                            <CardDescription>
+                                Lance atual: {auction.currentBid.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+                            </CardDescription>
+                        </CardHeader>
                         <CardContent>
-
+                            <p className="text-sm text-muted-foreground mb-4">
+                                Termina em: <CountdownTimer endTime={auction.endTime} />
+                            </p>
                         </CardContent>
-                    </CardHeader>
-                </Card>
+                    </Card>
+
+                    {/* Vendor Info */}
+                    <VendorInfo vendorId={auction.vendorId} />
+
+                    {/* Bid History */}
+                    <BidHistory auctionId={auction.id} />
+                </div>
             </div>
         </div>
     );

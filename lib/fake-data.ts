@@ -1,3 +1,51 @@
+export const vendors = {
+  1: { name: "Carlos Silva", rating: 4.8, totalSales: 23 },
+  2: { name: "Maria Santos", rating: 4.9, totalSales: 45 },
+  3: { name: "João Oliveira", rating: 4.7, totalSales: 12 },
+  4: { name: "Roberto Almeida", rating: 4.6, totalSales: 31 },
+  5: { name: "Fernanda Costa", rating: 4.8, totalSales: 18 },
+  6: { name: "Marcos Pereira", rating: 4.9, totalSales: 52 },
+  7: { name: "Juliana Ribeiro", rating: 4.5, totalSales: 27 },
+};
+
+export const bidHistory = {
+  1: [
+    { bidder: "Ana Costa", amount: 73890000, time: "2 min atrás" },
+    { bidder: "Pedro Lima", amount: 73800000, time: "5 min atrás" },
+    { bidder: "Lucas Rocha", amount: 73700000, time: "8 min atrás" },
+  ],
+  2: [
+    { bidder: "Sofia Mendes", amount: 43990, time: "1 min atrás" },
+    { bidder: "Rafael Torres", amount: 43500, time: "3 min atrás" },
+    { bidder: "Camila Dias", amount: 43000, time: "7 min at rás" },
+  ],
+  3: [
+    { bidder: "Eduardo Martins", amount: 1239980, time: "4 min atrás" },
+    { bidder: "Beatriz Souza", amount: 1200000, time: "12 min atrás" },
+    { bidder: "Gabriel Nunes", amount: 1150000, time: "25 min atrás" },
+  ],
+  4: [
+    { bidder: "Patrícia Lopes", amount: 138790, time: "6 min atrás" },
+    { bidder: "André Ferreira", amount: 135000, time: "15 min atrás" },
+    { bidder: "Carla Moreira", amount: 130000, time: "28 min atrás" },
+  ],
+  5: [
+    { bidder: "Ricardo Barbosa", amount: 2300, time: "3 min atrás" },
+    { bidder: "Larissa Campos", amount: 2200, time: "18 min atrás" },
+    { bidder: "Diego Santos", amount: 2100, time: "35 min atrás" },
+  ],
+  6: [
+    { bidder: "Vanessa Lima", amount: 12990, time: "1 min atrás" },
+    { bidder: "Thiago Rocha", amount: 12500, time: "9 min atrás" },
+    { bidder: "Isabela Cruz", amount: 12000, time: "22 min atrás" },
+  ],
+  7: [
+    { bidder: "Felipe Oliveira", amount: 247290, time: "7 min atrás" },
+    { bidder: "Amanda Silva", amount: 240000, time: "20 min atrás" },
+    { bidder: "Bruno Costa", amount: 235000, time: "41 min atrás" },
+  ],
+};
+
 export const auctions = [
     {
       id: 1,
@@ -7,6 +55,7 @@ export const auctions = [
       currentBid: 73890000,
       endTime: new Date(Date.now() + 2 * 14 * 45 * 60 * 1000),
       imageUrl: "https://images.girardo.com/girardo/image/upload/2021/03/girardo-co-1965-ferrari-275-gtb-competizione-sn-07437-342-copy.jpg",
+      vendorId: 1,
     },
     {
       id: 2,
@@ -16,6 +65,7 @@ export const auctions = [
       currentBid: 43990,
       endTime: new Date(Date.now() + 1 * 3 * 32 * 60 * 1000),
       imageUrl: "https://www.paradisoluxury.com/28325-extralarge_default/paul-newman-new.jpg",
+      vendorId: 2,
     },
     {
       id: 3,
@@ -25,6 +75,7 @@ export const auctions = [
       currentBid: 1239980,
       endTime: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       imageUrl: "https://www.sellingantiques.co.uk/photosnew/dealer_stricklandrussell/dealer_stricklandrussell_highres_1656853879703-3110540682.jpg",
+      vendorId: 3,
     },
     {
       id: 4,
@@ -34,6 +85,7 @@ export const auctions = [
       currentBid: 138790,
       endTime: new Date(Date.now() + 5 * 2 * 15 * 60 * 1000),
       imageUrl: "https://p.turbosquid.com/ts-thumb/0H/KzEfy3/1x/contextsearchimagelouisxv/jpg/1617817062/600x600/fit_q87/69c989843900b781b968bb8775eaecf10adcdc89/contextsearchimagelouisxv.jpg",
+      vendorId: 4,
     },
     {
       id: 5,
@@ -43,6 +95,7 @@ export const auctions = [
       currentBid: 2300,
       endTime: new Date(Date.now() + 1 * 18 * 9 * 43 * 1000),
       imageUrl: "https://m.media-amazon.com/images/I/91NjRrx511L._UF894,1000_QL80_.jpg",
+      vendorId: 5,
     },
     {
       id: 6,
@@ -52,6 +105,7 @@ export const auctions = [
       currentBid: 12990,
       endTime: new Date(Date.now() + 7 * 6 * 50 * 1000),
       imageUrl: "https://vplive-wp.s3.eu-west-2.amazonaws.com/wp-content/uploads/2020/11/JC1491_2.jpg",
+      vendorId: 6,
     },
     {
       id: 7,
@@ -61,5 +115,6 @@ export const auctions = [
       currentBid: 247290,
       endTime: new Date(Date.now() + 14 * 14 * 18 * 23 * 1000),
       imageUrl: "https://dempseymotorsports.com/wp-content/uploads/2018/10/h_57-1024x768.jpg",
+      vendorId: 7,
     },
   ]
