@@ -10,6 +10,9 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import OAuthButtons from "../../o-auth-buttons"
 import { Spinner } from "@/components/ui/spinner"
+import { useAuthActions } from "@convex-dev/auth/react"
+import { useRouter } from "next/navigation"
+import { useState } from "react"
 
 const registerSchema = z.object({
     name: z.string().min(1, "Nome é obrigatório").trim(),
@@ -21,6 +24,9 @@ const registerSchema = z.object({
 })
 
 export default function RegisterForm() {
+    const [serverError, setServerError] = useState<string | null>(null)
+    const { signIn } = useAuthActions()
+    const router = useRouter()
 
     // Form
     const registerForm = useForm<z.infer<typeof registerSchema>>({
@@ -33,8 +39,28 @@ export default function RegisterForm() {
     })
 
     // Submit handler
-    const onSubmitRegister = (data: z.infer<typeof registerSchema>) => {
+    const onSubmitRegister = async (data: z.infer<typeof registerSchema>) => {
         // TODO: Implement register
+        setServerError(null)
+
+        const formData = new FormData()
+        formData.append("name", data.name)
+        formData.append("email", data.email)
+        formData.append("password", data.password)
+        formData.append("flow", "signUp")
+
+        try {
+            await signIn("password", formData)
+            router.push("/")
+        } catch (err: unknown) {
+            console.error("Erro no cadastro:", err)
+            if (err instanceof Error) {
+                setServerError(err.message)
+            } else {
+                setServerError("Ocorreu um erro desconhecido")
+            }
+        }
+
     }
 
     return (
@@ -52,8 +78,6 @@ export default function RegisterForm() {
                                 placeholder="João da Silva"
                                 {...field}
                                 disabled={registerForm.formState.isSubmitting}
-                                onBlur={field.onBlur}
-                                onChange={field.onChange}
                             />
                         </FieldContent>
                         {fieldState.error && (
@@ -74,8 +98,6 @@ export default function RegisterForm() {
                                 placeholder="exemplo@email.com"
                                 {...field}
                                 disabled={registerForm.formState.isSubmitting}
-                                onBlur={field.onBlur}
-                                onChange={field.onChange}
                             />
                         </FieldContent>
                         {fieldState.error && (
@@ -96,8 +118,6 @@ export default function RegisterForm() {
                                 placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"
                                 {...field}
                                 disabled={registerForm.formState.isSubmitting}
-                                onBlur={field.onBlur}
-                                onChange={field.onChange}
                             />
                         </FieldContent>
                         {fieldState.error && (
@@ -111,6 +131,11 @@ export default function RegisterForm() {
                 <Button type="submit" className="w-full" disabled={registerForm.formState.isSubmitting}>
                     {registerForm.formState.isSubmitting ? <Spinner /> : "Cadastrar"}
                 </Button>
+                {serverError && (
+                    <p className="text-sm text-center text-red-500 pt-2">
+                        {serverError}
+                    </p>
+                )}
                 <p className="text-sm text-center">
                     Já tem uma conta? <Link href="/login" className="text-primary hover:text-primary/80 font-medium hover:underline">Faça login</Link>
                 </p>

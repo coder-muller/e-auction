@@ -1,5 +1,6 @@
 "use client"
 
+import { toast } from "sonner";
 import { Button } from "../ui/button";
 
 interface OAuthButtonsProps {
@@ -11,10 +12,12 @@ export default function OAuthButtons({ isSubmitting }: OAuthButtonsProps) {
     // OAuth handlers
     const handleGoogleLogin = () => {
         // TODO: Implement Google login
+        toast.error("ainda não implementado!")
     }
 
     const handleAppleLogin = () => {
         // TODO: Implement Apple login
+        toast.error("ainda não implementado!")
     }
 
     // Helper functions

@@ -50,6 +50,7 @@ const applicationTables = {
             v.literal("endingSoon")
         ),
         fromUserId: v.optional(v.id("users")),
+        seen: v.boolean(),
         toUserId: v.id("users"),
         itemId: v.optional(v.id("items")),
         createdAt: v.string()

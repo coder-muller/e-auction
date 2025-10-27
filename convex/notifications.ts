@@ -1,5 +1,5 @@
-import { internalMutation, query } from "./_generated/server"
-import { v } from "convex/values"
+import { internalMutation, mutation, query } from "./_generated/server"
+import { ConvexError, v } from "convex/values"
 import { getAuthUserId } from "@convex-dev/auth/server"
 
 export const createNotification = internalMutation({
@@ -23,10 +23,39 @@ export const createNotification = internalMutation({
                 fromUserId,
                 toUserId,
                 type,
+                seen: false,
                 createdAt: new Date().toISOString()
             })
 
         return newNotification
+    }
+})
+
+export const seeNotifications = mutation({
+    args: {
+        notificationIds: v.array(v.id("notifications"))
+    },
+    handler: async (ctx, args) => {
+        const userId = await getAuthUserId(ctx)
+        if (!userId) throw new ConvexError({
+            status: 401,
+            message: "usuário não autenticado"
+        })
+
+        const items = await Promise.all(
+            args.notificationIds.map(async (n) => {
+                const notification = await ctx.db.get(n)
+                if (notification?.toUserId !== userId) throw new ConvexError({
+                    status: 401,
+                    message: "usuário não autorizado"
+                })
+                else {
+                    await ctx.db.patch(n, { seen: true })
+                }
+            })
+        )
+
+        return items
     }
 })
 

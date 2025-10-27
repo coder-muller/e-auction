@@ -15,9 +15,15 @@ import { User } from "lucide-react";
 import { useTheme } from "next-themes";
 import Link from "next/link";
 import { useAuthActions } from "@convex-dev/auth/react";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
 
 export function Header() {
     const { setTheme, theme } = useTheme();
+    const { signOut } = useAuthActions()
+
+    const user = useQuery(api.auth.loggedInUser)
+    const notifications = useQuery(api.notifications.getNotifications)
 
     const handleToggleTheme = () => {
         setTheme(theme === "dark" ? "light" : "dark");

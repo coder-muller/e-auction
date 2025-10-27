@@ -3,37 +3,43 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
+import { ConvexAuthNextjsServerProvider } from "@convex-dev/auth/nextjs/server"
+import { ConvexClientProvider } from "./ConvexClientProvider";
 
 const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+    variable: "--font-geist-sans",
+    subsets: ["latin"],
 });
 
 const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+    variable: "--font-geist-mono",
+    subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
-  title: "e-Auction",
-  description: "e-Auction, a melhor plataforma de leilões online!",
+    title: "e-Auction",
+    description: "e-Auction, a melhor plataforma de leilões online!",
 };
 
 export default function RootLayout({
-  children,
+    children,
 }: Readonly<{
-  children: React.ReactNode;
+    children: React.ReactNode;
 }>) {
-  return (
-    <html lang="pt-BR" suppressHydrationWarning>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          {children}
-          <Toaster richColors />
-        </ThemeProvider>
-      </body>
-    </html>
-  );
+    return (
+        <ConvexAuthNextjsServerProvider>
+            <html lang="pt-BR" suppressHydrationWarning>
+                <body
+                    className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+                >
+                    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+                        <ConvexClientProvider>
+                            {children}
+                            <Toaster richColors />
+                        </ConvexClientProvider>
+                    </ThemeProvider>
+                </body>
+            </html>
+        </ConvexAuthNextjsServerProvider>
+    );
 }
