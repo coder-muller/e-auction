@@ -61,13 +61,11 @@ export function Header() {
                         <PopoverContent className="w-80 p-4" align="end">
                             <div>
                                 <h1 className="text-lg font-semibold mb-3">Notificações</h1>
-
                                 {notifications?.length > 0 ? (
                                     <>
                                         <Button onClick={handleSeeNotifications} variant="outline" className="w-full my-2">
                                             Limpar notificações
                                         </Button>
-
                                         <ul className="space-y-3">
                                             {notifications?.map((n) => {
                                                 if (n?.type === "outbid") return (

@@ -40,7 +40,6 @@ export default function RegisterForm() {
 
     // Submit handler
     const onSubmitRegister = async (data: z.infer<typeof registerSchema>) => {
-        // TODO: Implement register
         setServerError(null)
 
         const formData = new FormData()
@@ -78,6 +77,7 @@ export default function RegisterForm() {
                                 placeholder="João da Silva"
                                 {...field}
                                 disabled={registerForm.formState.isSubmitting}
+                                autoComplete="off"
                             />
                         </FieldContent>
                         {fieldState.error && (
@@ -98,6 +98,7 @@ export default function RegisterForm() {
                                 placeholder="exemplo@email.com"
                                 {...field}
                                 disabled={registerForm.formState.isSubmitting}
+                                autoComplete="off"
                             />
                         </FieldContent>
                         {fieldState.error && (
@@ -118,6 +119,7 @@ export default function RegisterForm() {
                                 placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"
                                 {...field}
                                 disabled={registerForm.formState.isSubmitting}
+                                autoComplete="off"
                             />
                         </FieldContent>
                         {fieldState.error && (

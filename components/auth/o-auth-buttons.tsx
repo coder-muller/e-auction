@@ -12,12 +12,16 @@ export default function OAuthButtons({ isSubmitting }: OAuthButtonsProps) {
     // OAuth handlers
     const handleGoogleLogin = () => {
         // TODO: Implement Google login
-        toast.error("ainda não implementado!")
+        toast.info("Login com o Google ainda não implementado", {
+            description: "Estamos trabalhando para adicionar este recurso em breve.",
+        })
     }
 
     const handleAppleLogin = () => {
         // TODO: Implement Apple login
-        toast.error("ainda não implementado!")
+        toast.info("Login com o Apple ainda não implementado", {
+            description: "Estamos trabalhando para adicionar este recurso em breve.",
+        })
     }
 
     // Helper functions
