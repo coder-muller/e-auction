@@ -37,6 +37,7 @@ const applicationTables = {
         buyerId: v.id("users"),
         amount: v.number(), // in cents
         status: v.union(v.literal("pending"), v.literal("completed"), v.literal("failed")),
+        // adicionar chave única para autenticidade
     })
         .index("by_seller", ["sellerId"])
         .index("by_buyer", ["buyerId"]),
