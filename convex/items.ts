@@ -71,7 +71,7 @@ export const getStatics = query({
 });
 
 // ... rest of the file unchanged
-export const get = query({
+export const getItem = query({
     args: { itemId: v.id("items") },
     handler: async (ctx, args) => {
         const item = await ctx.db.get(args.itemId);
@@ -87,8 +87,10 @@ export const get = query({
                     .withIndex("by_id", (q) => q.eq("_id", b))
                     .unique()
 
+                if (!bid) return
+
                 const user = await ctx.db.query("users")
-                    .withIndex("by_id", (q) => q.eq("_id", bids?.bidderId))
+                    .withIndex("by_id", (q) => q.eq("_id", bid.bidderId))
                     .unique()
 
                 const amount = bid?.amount

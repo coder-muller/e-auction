@@ -112,7 +112,7 @@ interface AuctionPageProps {
 export default function AuctionPage({ params }: AuctionPageProps) {
     const resolvedParams = use(params);
     const auctionId: Id<"items"> = resolvedParams.auctionId
-    const auction = useQuery(api.items.get, { itemId: auctionId })
+    const auction = useQuery(api.items.getItem, { itemId: auctionId })
 
     const [bidAmount, setBidAmount] = useState<string>("");
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -154,7 +154,7 @@ export default function AuctionPage({ params }: AuctionPageProps) {
         );
     }
 
-    const isEnded = new Date() > auction.endTime;
+    const isEnded = new Date() > new Date(auction.expiringAt);
 
     return (
         <div className="flex flex-col gap-4">
@@ -173,8 +173,9 @@ export default function AuctionPage({ params }: AuctionPageProps) {
                 <Card className="col-span-1 lg:col-span-2 overflow-hidden">
                     <CardHeader>
                         <CardTitle className="text-xl font-semibold">{auction.title}</CardTitle>
-                        <CardDescription className="text-sm text-muted-foreground">
-                            {auction.city} • {auction.state}
+                        <CardDescription className="text-sm flex flex-col text-muted-foreground">
+                            <span>{auction.city} • {auction.state}</span>
+                            <span>{auction.description}</span>
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
