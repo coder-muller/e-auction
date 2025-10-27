@@ -127,11 +127,7 @@ export default function AuctionPage({ params }: AuctionPageProps) {
         if (!auction) return;
 
         const bidValue = parseFloat(bidAmount.replace(/[^\d,]/g, '').replace(',', '.'));
-<<<<<<< HEAD
         if (!bidValue || bidValue <= (auction.lastBidValue ?? auction.startingPrice)) {
-=======
-        if (!bidValue || bidValue <= auction.currentBid) {
->>>>>>> 80a816f (fix: bid value on bid)
             toast.error("O lance deve ser maior que o lance atual");
             return;
         }
