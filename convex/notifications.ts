@@ -32,30 +32,27 @@ export const createNotification = internalMutation({
 })
 
 export const seeNotifications = mutation({
-    args: {
-        notificationIds: v.array(v.id("notifications"))
-    },
-    handler: async (ctx, args) => {
+    handler: async (ctx) => {
         const userId = await getAuthUserId(ctx)
         if (!userId) throw new ConvexError({
             status: 401,
             message: "usuário não autenticado"
         })
 
-        const items = await Promise.all(
-            args.notificationIds.map(async (n) => {
-                const notification = await ctx.db.get(n)
-                if (notification?.toUserId !== userId) throw new ConvexError({
-                    status: 401,
-                    message: "usuário não autorizado"
+        const notifications = await ctx.db.query("notifications")
+            .withIndex("byToUserId", (q) => q.eq("toUserId", userId))
+            .collect()
+
+        const seen = await Promise.all(
+            notifications.map(async (n) => {
+                await ctx.db.patch(n._id, {
+                    seen: true
                 })
-                else {
-                    await ctx.db.patch(n, { seen: true })
-                }
             })
         )
 
-        return items
+        return seen
+
     }
 })
 
@@ -63,7 +60,7 @@ export const getNotifications = query({
     args: {},
     handler: async (ctx) => {
         const userId = await getAuthUserId(ctx)
-        if (!userId) throw new Error("usuário não encontrado")
+        if (!userId) return
 
         const notifications = await ctx.db
             .query("notifications")
@@ -71,6 +68,22 @@ export const getNotifications = query({
             .order("desc")
             .take(20)
 
-        return notifications
+        const notificationsWithItems = await Promise.all(
+            notifications.map(async (n) => {
+                if (!n.itemId) return
+
+                const item = await ctx.db.query("items")
+                    .withIndex("by_id", (q) => q.eq("_id", n.itemId!))
+                    .unique()
+
+                return {
+                    ...n,
+                    item
+                }
+            })
+
+        )
+
+        return notificationsWithItems
     }
 })

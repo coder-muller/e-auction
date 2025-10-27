@@ -20,9 +20,10 @@ import type * as crons from "../crons.js";
 import type * as http from "../http.js";
 import type * as items from "../items.js";
 import type * as notifications from "../notifications.js";
+import type * as provider from "../provider.js";
 import type * as realtime from "../realtime.js";
 import type * as router from "../router.js";
-import type * as seed from "../seed.js";
+import type * as users from "../users.js";
 import type * as watchlist from "../watchlist.js";
 
 /**
@@ -41,9 +42,10 @@ declare const fullApi: ApiFromModules<{
   http: typeof http;
   items: typeof items;
   notifications: typeof notifications;
+  provider: typeof provider;
   realtime: typeof realtime;
   router: typeof router;
-  seed: typeof seed;
+  users: typeof users;
   watchlist: typeof watchlist;
 }>;
 export declare const api: FilterApi<

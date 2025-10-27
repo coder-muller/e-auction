@@ -36,6 +36,15 @@ export const list = query({
     },
 });
 
+export const getAllItems = query({
+    handler: async (ctx) => {
+        const items = await ctx.db.query("items")
+            .collect()
+
+        return items
+    }
+})
+
 export const getStatics = query({
     args: { itemIds: v.array(v.id("items")) },
     handler: async (ctx, args) => {
@@ -71,16 +80,30 @@ export const get = query({
         // Get seller info
         const seller = await ctx.db.get(item.sellerId);
 
-        // Get last bidder info if exists
-        let lastBidder = null;
-        if (item.lastBidderId) {
-            lastBidder = await ctx.db.get(item.lastBidderId);
-        }
+        const bids: any = await Promise.all(
+            item.bids.map(async (b) => {
+                if (!item.bids) return
+                const bid = await ctx.db.query("bids")
+                    .withIndex("by_id", (q) => q.eq("_id", b))
+                    .unique()
+
+                const user = await ctx.db.query("users")
+                    .withIndex("by_id", (q) => q.eq("_id", bids?.bidderId))
+                    .unique()
+
+                const amount = bid?.amount
+
+                return {
+                    amount,
+                    user
+                }
+            })
+        )
 
         return {
             ...item,
             seller: seller ? { name: seller.name, email: seller.email } : null,
-            lastBidder: lastBidder ? { name: lastBidder.name } : null,
+            bids: bids ? { bids: bids } : null,
         };
     },
 });
@@ -110,6 +133,7 @@ export const create = mutation({
             startingAt: now,
             expiringAt,
             category: args.category,
+            bids: []
         });
     },
 });

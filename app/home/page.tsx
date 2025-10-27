@@ -6,22 +6,21 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
-import { Search, X, Clock, TrendingUp, Flame, Zap } from "lucide-react";
+import { Search, X, Clock, Zap } from "lucide-react";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { Filter } from "lucide-react";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
-function CountdownTimer({ endTime }: { endTime: Date }) {
+function CountdownTimer({ endTime }: { endTime: number }) {
     const [timeLeft, setTimeLeft] = useState<string>("");
 
     useEffect(() => {
         const timer = setInterval(() => {
             const now = new Date().getTime();
-            const distance = endTime.getTime() - now;
+            const distance = endTime - now;
 
             if (distance > 0) {
                 const days = Math.floor(distance / (1000 * 60 * 60 * 24));

@@ -13,6 +13,7 @@ const applicationTables = {
         sellerId: v.id("users"),
         status: v.union(v.literal("draft"), v.literal("live"), v.literal("ended")),
         startingAt: v.number(),
+        bids: v.array(v.id("bids")),
         expiringAt: v.number(), // denormalized for quick access
         winnerId: v.optional(v.id("users")),
         category: v.string(),

@@ -15,17 +15,20 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { Id } from "@/convex/_generated/dataModel";
 
 const bidFormSchema = z.object({
     amount: z.number().min(1),
 });
 
-function CountdownTimer({ endTime }: { endTime: Date }) {
+function CountdownTimer({ endTime }: { endTime: number }) {
     const [timeLeft, setTimeLeft] = useState<string>("");
     useEffect(() => {
         const timer = setInterval(() => {
             const now = new Date().getTime();
-            const distance = endTime.getTime() - now;
+            const distance = endTime - now;
 
             if (distance > 0) {
                 const days = Math.floor(distance / (1000 * 60 * 60 * 24));
@@ -45,8 +48,8 @@ function CountdownTimer({ endTime }: { endTime: Date }) {
     return <span className="font-mono">{timeLeft}</span>;
 }
 
-const VendorInfo = ({ vendorId }: { vendorId: number }) => {
-    const vendor = vendors[vendorId as keyof typeof vendors];
+const VendorInfo = ({ sellerId }: { sellerId: Id<"users"> }) => {
+    const vendor = useQuery(api.users.getUserById, { userId: sellerId })
     if (!vendor) return null;
 
     return (
@@ -73,8 +76,8 @@ const VendorInfo = ({ vendorId }: { vendorId: number }) => {
     );
 };
 
-const BidHistory = ({ auctionId }: { auctionId: number }) => {
-    const bids = bidHistory[auctionId as keyof typeof bidHistory] || [];
+const BidHistory = ({ auctionId }: { auctionId: Id<"items"> }) => {
+    const bids: any[] = []
 
     return (
         <Card>
@@ -102,14 +105,14 @@ const BidHistory = ({ auctionId }: { auctionId: number }) => {
 
 interface AuctionPageProps {
     params: Promise<{
-        auctionId: string;
+        auctionId: Id<"items">;
     }>;
 }
 
 export default function AuctionPage({ params }: AuctionPageProps) {
     const resolvedParams = use(params);
-    const auctionId = parseInt(resolvedParams.auctionId);
-    const auction = auctions.find((auction) => auction.id === auctionId);
+    const auctionId: Id<"items"> = resolvedParams.auctionId
+    const auction = useQuery(api.items.get, { itemId: auctionId })
 
     const [bidAmount, setBidAmount] = useState<string>("");
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -124,7 +127,7 @@ export default function AuctionPage({ params }: AuctionPageProps) {
         if (!auction) return;
 
         const bidValue = parseFloat(bidAmount.replace(/[^\d,]/g, '').replace(',', '.'));
-        if (!bidValue || bidValue <= auction.currentBid) {
+        if (!bidValue || bidValue <= (auction.lastBidValue ?? auction.startingPrice)) {
             toast.error("O lance deve ser maior que o lance atual");
             return;
         }
@@ -177,7 +180,7 @@ export default function AuctionPage({ params }: AuctionPageProps) {
                     <CardContent>
                         <div className="relative aspect-[4/3] w-full overflow-hidden">
                             <Image
-                                src={auction.imageUrl}
+                                src={auction.imageUrl || "https://placehold.jp/150x150.png"}
                                 alt={auction.title}
                                 fill
                                 unoptimized
@@ -194,22 +197,24 @@ export default function AuctionPage({ params }: AuctionPageProps) {
                     <Card>
                         <CardHeader>
                             <CardTitle className="text-xl font-semibold">Dê um lance</CardTitle>
-                            <CardDescription>
-                                Lance atual: {auction.currentBid.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
-                            </CardDescription>
+                            {auction.lastBidValue &&
+                                <CardDescription>
+                                    Lance atual: {auction.lastBidValue.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+                                </CardDescription>
+                            }
                         </CardHeader>
                         <CardContent>
                             <p className="text-sm text-muted-foreground mb-4">
-                                Termina em: <CountdownTimer endTime={auction.endTime} />
+                                Termina em: <CountdownTimer endTime={auction.expiringAt} />
                             </p>
                         </CardContent>
                     </Card>
 
                     {/* Vendor Info */}
-                    <VendorInfo vendorId={auction.vendorId} />
+                    <VendorInfo sellerId={auction.sellerId} />
 
                     {/* Bid History */}
-                    <BidHistory auctionId={auction.id} />
+                    <BidHistory auctionId={auction._id} />
                 </div>
             </div>
         </div>
