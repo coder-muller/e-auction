@@ -72,9 +72,9 @@ export function NewestTab({ auctions }: NewestTabProps) {
                                     <Button className="shrink-0 w-full">Mais informações</Button>
                                 </Link>
                             </div>
-                            <p className="text-xs text-center text-muted-foreground">
+                            <span className="text-xs text-center text-muted-foreground">
                                 Termina em <CountdownTimer endTime={auction.endTime} />
-                            </p>
+                            </span>
                         </CardContent>
                     </Card>
                 ))}
