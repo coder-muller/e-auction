@@ -10,6 +10,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import OAuthButtons from "../../o-auth-buttons"
 import { Spinner } from "@/components/ui/spinner"
+import { useRouter } from "next/navigation"
 
 const registerSchema = z.object({
     name: z.string().min(1, "Nome é obrigatório").trim(),
@@ -21,6 +22,9 @@ const registerSchema = z.object({
 })
 
 export default function RegisterForm() {
+
+    // Router
+    const router = useRouter()
 
     // Form
     const registerForm = useForm<z.infer<typeof registerSchema>>({
@@ -35,6 +39,9 @@ export default function RegisterForm() {
     // Submit handler
     const onSubmitRegister = (data: z.infer<typeof registerSchema>) => {
         // TODO: Implement register
+
+        router.push("/")
+
     }
 
     return (
@@ -52,8 +59,7 @@ export default function RegisterForm() {
                                 placeholder="João da Silva"
                                 {...field}
                                 disabled={registerForm.formState.isSubmitting}
-                                onBlur={field.onBlur}
-                                onChange={field.onChange}
+                                autoComplete="off"
                             />
                         </FieldContent>
                         {fieldState.error && (
@@ -74,8 +80,7 @@ export default function RegisterForm() {
                                 placeholder="exemplo@email.com"
                                 {...field}
                                 disabled={registerForm.formState.isSubmitting}
-                                onBlur={field.onBlur}
-                                onChange={field.onChange}
+                                autoComplete="off"
                             />
                         </FieldContent>
                         {fieldState.error && (
@@ -96,8 +101,7 @@ export default function RegisterForm() {
                                 placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"
                                 {...field}
                                 disabled={registerForm.formState.isSubmitting}
-                                onBlur={field.onBlur}
-                                onChange={field.onChange}
+                                autoComplete="off"
                             />
                         </FieldContent>
                         {fieldState.error && (

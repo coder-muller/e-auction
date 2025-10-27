@@ -36,10 +36,10 @@ export function Header() {
                     </PopoverTrigger>
                     <PopoverContent className="w-80 p-4" align="end">
                         <div>
-                            <h1 className="text-lg font-semibold mb-3">Notifications</h1>
+                            <h1 className="text-lg font-semibold mb-3">Notificações</h1>
 
                             <Button variant="outline" className="w-full my-2">
-                                Clear all notifications
+                                Limpar todas as notificações
                             </Button>
 
                             <ul className="space-y-3">
@@ -49,9 +49,9 @@ export function Header() {
                                     </span>
                                     <div>
                                         <p className="text-sm">
-                                            Your bid on <span className="font-medium">&quot;Rolex Submariner&quot;</span> was outbid.
+                                            Seu lance em <span className="font-medium">&quot;Rolex Submariner&quot;</span> foi superado.
                                         </p>
-                                        <span className="text-xs text-muted-foreground">2 minutes ago</span>
+                                        <span className="text-xs text-muted-foreground">2 minutos atrás</span>
                                     </div>
                                 </li>
                                 <li className="flex items-start gap-2 cursor-pointer hover:bg-accent rounded-md p-2">
@@ -60,9 +60,9 @@ export function Header() {
                                     </span>
                                     <div>
                                         <p className="text-sm">
-                                            Congratulations! You won the auction for <span className="font-medium">&quot;Vintage Porsche 911&quot;</span>.
+                                            Parabéns! Você venceu o leilão de <span className="font-medium">&quot;Porsche 911 Vintage&quot;</span>.
                                         </p>
-                                        <span className="text-xs text-muted-foreground">1 hour ago</span>
+                                        <span className="text-xs text-muted-foreground">1 hora atrás</span>
                                     </div>
                                 </li>
                                 <li className="flex items-start gap-2 cursor-pointer hover:bg-accent rounded-md p-2">
@@ -71,9 +71,9 @@ export function Header() {
                                     </span>
                                     <div>
                                         <p className="text-sm">
-                                            New auction <span className="font-medium">&quot;Diamond Necklace 5ct&quot;</span> is now live.
+                                            Novo leilão <span className="font-medium">&quot;Colar de Diamante 5ct&quot;</span> está ao vivo.
                                         </p>
-                                        <span className="text-xs text-muted-foreground">3 hours ago</span>
+                                        <span className="text-xs text-muted-foreground">3 horas atrás</span>
                                     </div>
                                 </li>
                             </ul>
@@ -115,10 +115,12 @@ export function Header() {
                             Toggle Theme
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem className="hover:text-destructive focus:text-destructive group transition-colors duration-300 cursor-pointer">
-                            <LogOut className="group-hover:text-destructive group-focus:text-destructive transition-colors duration-300" />
-                            Logout
-                        </DropdownMenuItem>
+                        <Link href="/login">
+                            <DropdownMenuItem className="hover:text-destructive focus:text-destructive group transition-colors duration-300 cursor-pointer">
+                                <LogOut className="group-hover:text-destructive group-focus:text-destructive transition-colors duration-300" />
+                                Logout
+                            </DropdownMenuItem>
+                        </Link>
                     </DropdownMenuContent>
                 </DropdownMenu>
             </div>

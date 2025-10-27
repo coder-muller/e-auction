@@ -10,6 +10,7 @@ import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import OAuthButtons from "../../o-auth-buttons"
+import { useRouter } from "next/navigation"
 
 const loginSchema = z.object({
     email: z.email("Email inválido").trim(),
@@ -17,6 +18,9 @@ const loginSchema = z.object({
 })
 
 export default function LoginForm() {
+
+    // Router
+    const router = useRouter()
 
     // Form
     const loginForm = useForm<z.infer<typeof loginSchema>>({
@@ -30,6 +34,7 @@ export default function LoginForm() {
     // Submit handler
     const onSubmitLogin = (data: z.infer<typeof loginSchema>) => {
         // TODO: Implement login
+        router.push("/")
     }
 
     return (
@@ -39,7 +44,7 @@ export default function LoginForm() {
                     <Field data-invalid={fieldState.invalid}>
                         <FieldLabel htmlFor={field.name}>Email</FieldLabel>
                         <FieldContent>
-                            <Input id={field.name} aria-invalid={fieldState.invalid} type="email" placeholder="exemplo@email.com" {...field} disabled={loginForm.formState.isSubmitting} onBlur={field.onBlur} onChange={field.onChange} />
+                            <Input id={field.name} aria-invalid={fieldState.invalid} type="email" placeholder="exemplo@email.com" {...field} disabled={loginForm.formState.isSubmitting} autoComplete="off" />
                         </FieldContent>
                         {fieldState.error && (
                             <FieldError>
@@ -52,7 +57,7 @@ export default function LoginForm() {
                     <Field data-invalid={fieldState.invalid}>
                         <FieldLabel htmlFor={field.name}>Senha</FieldLabel>
                         <FieldContent>
-                            <Input id={field.name} aria-invalid={fieldState.invalid} type="password" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" {...field} disabled={loginForm.formState.isSubmitting} onBlur={field.onBlur} onChange={field.onChange} />
+                            <Input id={field.name} aria-invalid={fieldState.invalid} type="password" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" {...field} disabled={loginForm.formState.isSubmitting} autoComplete="off" />
                         </FieldContent>
                         {fieldState.error && (
                             <FieldError>
