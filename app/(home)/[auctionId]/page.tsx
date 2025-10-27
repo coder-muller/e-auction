@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, TriangleAlert } from "lucide-react";
+import { ArrowLeft, Loader2, TriangleAlert } from "lucide-react";
 import Link from "next/link";
 import { useEffect, use, useState } from "react";
 import { auctions, vendors, bidHistory } from "@/lib/fake-data";
@@ -123,7 +123,7 @@ export default function AuctionPage({ params }: AuctionPageProps) {
 
         if (!auction) return;
 
-        const bidValue = parseFloat(bidAmount.replace(/[^\d,]/g, '').replace(',', '.'));
+        const bidValue = parseFloat(bidAmount.replace(/[^\d,]/g, '').replace(',', '.')) * 100;
         if (!bidValue || bidValue <= auction.currentBid) {
             toast.error("O lance deve ser maior que o lance atual");
             return;
@@ -199,6 +199,10 @@ export default function AuctionPage({ params }: AuctionPageProps) {
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
+                            <div className="flex gap-2">
+                                <Input type="number" value={bidAmount} onChange={(e) => setBidAmount(e.target.value)} />
+                                <Button onClick={handleBidSubmit} disabled={isSubmitting}>{isSubmitting ? <Loader2 className="animate-spin" /> : "dar lance"}</Button>
+                            </div>
                             <p className="text-sm text-muted-foreground mb-4">
                                 Termina em: <CountdownTimer endTime={auction.endTime} />
                             </p>
