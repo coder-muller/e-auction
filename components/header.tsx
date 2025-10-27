@@ -14,6 +14,7 @@ import { Moon } from "lucide-react";
 import { User } from "lucide-react";
 import { useTheme } from "next-themes";
 import Link from "next/link";
+import { useAuthActions } from "@convex-dev/auth/react";
 
 export function Header() {
     const { setTheme, theme } = useTheme();
@@ -116,8 +117,10 @@ export function Header() {
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem className="hover:text-destructive focus:text-destructive group transition-colors duration-300 cursor-pointer">
-                            <LogOut className="group-hover:text-destructive group-focus:text-destructive transition-colors duration-300" />
-                            Logout
+                            <Button onClick={() => signOut} variant="ghost">
+                                <LogOut className="group-hover:text-destructive group-focus:text-destructive transition-colors duration-300" />
+                                Logout
+                            </Button>
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
