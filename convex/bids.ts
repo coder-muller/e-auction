@@ -1,15 +1,13 @@
-import { query, mutation, internalMutation } from "./_generated/server";
+import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { paginationOptsValidator } from "convex/server";
-import { createNotification } from "./notifications";
 import { api, internal } from "./_generated/api";
 
 export const placeBid = mutation({
     args: {
         itemId: v.id("items"),
         amount: v.number(), // in dollars
-        clientBidId: v.string(),
     },
     handler: async (ctx, args) => {
         const userId = await getAuthUserId(ctx);
@@ -18,11 +16,11 @@ export const placeBid = mutation({
         // Check for duplicate bid using clientBidId
         const existingBid = await ctx.db
             .query("bids")
-            .withIndex("by_client_bid_id", (q) => q.eq("clientBidId", args.clientBidId))
+            .withIndex("by_client_bid_id", (q) => q.eq("clientBidId", userId))
             .first();
 
-        if (existingBid) {
-            return { success: true, bidId: existingBid._id, message: "Bid already placed" };
+        if (existingBid?.amount === args.amount) {
+            throw new Error("Lance já realizado.")
         }
 
         const item = await ctx.db.get(args.itemId);
@@ -53,7 +51,7 @@ export const placeBid = mutation({
             itemId: args.itemId,
             bidderId: userId,
             amount: amountInCents,
-            clientBidId: args.clientBidId,
+            clientBidId: userId,
         });
 
         // Anti-sniping: extend auction if bid placed in last 5 minutes
@@ -104,18 +102,17 @@ export const placeBid = mutation({
 export const getBidHistory = query({
     args: {
         itemId: v.id("items"),
-        paginationOpts: paginationOptsValidator,
     },
     handler: async (ctx, args) => {
         const bids = await ctx.db
             .query("bids")
             .withIndex("by_item", (q) => q.eq("itemId", args.itemId))
             .order("desc")
-            .paginate(args.paginationOpts);
+            .take(3)
 
         // Enrich with bidder info
         const enrichedBids = await Promise.all(
-            bids.page.map(async (bid) => {
+            bids.map(async (bid) => {
                 const bidder = await ctx.db.get(bid.bidderId);
                 return {
                     ...bid,
@@ -125,8 +122,7 @@ export const getBidHistory = query({
         );
 
         return {
-            ...bids,
-            page: enrichedBids,
+            enrichedBids,
         };
     },
 });

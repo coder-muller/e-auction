@@ -15,12 +15,12 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 
 const bidFormSchema = z.object({
-    amount: z.number().min(1),
+    amount: z.string()
 });
 
 function CountdownTimer({ endTime }: { endTime: number }) {
@@ -69,15 +69,28 @@ const VendorInfo = ({ sellerId }: { sellerId: Id<"users"> }) => {
                     </div>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                    {vendor.totalSales} vendas realizadas
+                    {vendor.items.length} vendas realizadas
                 </p>
             </CardContent>
         </Card>
     );
 };
 
-const BidHistory = ({ auctionId }: { auctionId: Id<"items"> }) => {
-    const bids: any[] = []
+function BidHistory({ auctionId }: { auctionId: Id<"items"> }) {
+    const bids = useQuery(api.bids.getBidHistory, { itemId: auctionId })?.enrichedBids
+
+    if (bids?.length === 0) return (
+        <Card>
+            <CardHeader>
+                <CardTitle>Maiores Lances</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <p>Ainda não existem lances neste leilão.</p>
+                <p>Quem sabe você não faz o primeiro?</p>
+            </CardContent>
+        </Card>
+
+    )
 
     return (
         <Card>
@@ -86,14 +99,14 @@ const BidHistory = ({ auctionId }: { auctionId: Id<"items"> }) => {
             </CardHeader>
             <CardContent>
                 <div className="space-y-3">
-                    {bids.map((bid, index) => (
-                        <div key={index} className="flex items-center justify-between">
+                    {bids && bids?.map((bid) => (
+                        <div key={bid._id} className="flex items-center justify-between">
                             <div>
-                                <p className="font-medium text-sm">{bid.bidder}</p>
-                                <p className="text-xs text-muted-foreground">{bid.time}</p>
+                                <p className="font-medium text-sm">{String(bid.bidder?.name)}</p>
+                                <p className="text-xs text-muted-foreground">{new Date(bid._creationTime).toLocaleString()}</p>
                             </div>
                             <span className="font-semibold">
-                                {bid.amount.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+                                {(bid.amount / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
                             </span>
                         </div>
                     ))}
@@ -113,33 +126,37 @@ export default function AuctionPage({ params }: AuctionPageProps) {
     const resolvedParams = use(params);
     const auctionId: Id<"items"> = resolvedParams.auctionId
     const auction = useQuery(api.items.getItem, { itemId: auctionId })
+    const placeBid = useMutation(api.bids.placeBid)
 
     const [bidAmount, setBidAmount] = useState<string>("");
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    useEffect(() => {
-        console.log(auction);
-    }, [auction]);
+    const form = useForm<z.infer<typeof bidFormSchema>>({
+        resolver: zodResolver(bidFormSchema),
+    })
 
-    const handleBidSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-
+    const handleBidSubmit = async (data: z.infer<typeof bidFormSchema>) => {
         if (!auction) return;
+        const cleanedString = data.amount.replace(/[^\d,]/g, '').replace(',', '.')
 
-        const bidValue = parseFloat(bidAmount.replace(/[^\d,]/g, '').replace(',', '.'));
-        if (!bidValue || bidValue <= (auction.lastBidValue ?? auction.startingPrice)) {
-            toast.error("O lance deve ser maior que o lance atual");
-            return;
+        const valueAsFloat = parseFloat(cleanedString)
+
+        if (isNaN(valueAsFloat) || valueAsFloat <= 0) {
+            form.setError("amount", { message: "valor inválido" })
+            toast.error("Por favor, insira um valor válido")
+            return
         }
 
         setIsSubmitting(true);
+
         try {
-            // Simulate API call
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            toast.success("Lance realizado com sucesso!");
+            const response = placeBid({ amount: valueAsFloat, itemId: auctionId })
+            console.log(await response)
+            toast.success((await response).message);
             setBidAmount("");
-        } catch {
-            toast.error("Erro ao realizar lance");
+        } catch (err) {
+            const error = err instanceof Error ? err.message : "Ocorreu um erro desconhecido"
+            toast.error(error);
         } finally {
             setIsSubmitting(false);
         }
@@ -200,14 +217,30 @@ export default function AuctionPage({ params }: AuctionPageProps) {
                             <CardTitle className="text-xl font-semibold">Dê um lance</CardTitle>
                             {auction.lastBidValue &&
                                 <CardDescription>
-                                    Lance atual: {auction.lastBidValue.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+                                    Lance atual: {(auction.lastBidValue / 1000).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
                                 </CardDescription>
                             }
                         </CardHeader>
                         <CardContent>
                             <div className="flex gap-2">
-                                <Input type="number" value={bidAmount} onChange={(e) => setBidAmount(e.target.value)} />
-                                <Button onClick={handleBidSubmit} disabled={isSubmitting}>{isSubmitting ? <Loader2 className="animate-spin" /> : "dar lance"}</Button>
+                                <Form {...form}>
+                                    <form onSubmit={form.handleSubmit(handleBidSubmit)} className="flex gap-2">
+                                        <FormField
+                                            name="amount"
+                                            control={form.control}
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel hidden>valor do lance</FormLabel>
+                                                    <FormControl>
+                                                        <Input type="text" inputMode="decimal" placeholder="R$ 0,00" {...field} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <Button disabled={isSubmitting}>{isSubmitting ? <Loader2 className="animate-spin" /> : "dar lance"}</Button>
+                                    </form>
+                                </Form>
                             </div>
                             <p className="text-sm text-muted-foreground mb-4">
                                 Termina em: <CountdownTimer endTime={auction.expiringAt} />
