@@ -89,21 +89,23 @@ export function Header() {
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                        <DropdownMenuItem className="cursor-pointer">
-                            <div className="flex items-center gap-2">
-                                <Avatar className="size-8 rounded-md">
-                                    <AvatarImage src="https://github.com/coder-muller.png" />
-                                    <AvatarFallback>JD</AvatarFallback>
-                                </Avatar>
-                                <div className="flex flex-col">
-                                    <div className="flex items-center gap-2">
-                                        <p className="text-sm font-medium">Guilherme Müller</p>
-                                        <Crown className="size-3 text-yellow-500" />
+                        <Link href="/profile">
+                            <DropdownMenuItem className="cursor-pointer">
+                                <div className="flex items-center gap-2">
+                                    <Avatar className="size-8 rounded-md">
+                                        <AvatarImage src="https://github.com/coder-muller.png" />
+                                        <AvatarFallback>JD</AvatarFallback>
+                                    </Avatar>
+                                    <div className="flex flex-col">
+                                        <div className="flex items-center gap-2">
+                                            <p className="text-sm font-medium">Guilherme Müller</p>
+                                            <Crown className="size-3 text-yellow-500" />
+                                        </div>
+                                        <p className="text-sm text-muted-foreground">guilherme.muller@example.com</p>
                                     </div>
-                                    <p className="text-sm text-muted-foreground">guilherme.muller@example.com</p>
                                 </div>
-                            </div>
-                        </DropdownMenuItem>
+                            </DropdownMenuItem>
+                        </Link>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem className="group cursor-pointer">
                             <PlusCircle />
