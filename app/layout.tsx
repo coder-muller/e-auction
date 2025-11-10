@@ -26,6 +26,7 @@ export default function RootLayout({
 }: Readonly<{
     children: React.ReactNode;
 }>) {
+<<<<<<< HEAD
     return (
         <ConvexAuthNextjsServerProvider>
             <html lang="pt-BR" suppressHydrationWarning>
@@ -42,4 +43,18 @@ export default function RootLayout({
             </html>
         </ConvexAuthNextjsServerProvider>
     );
+=======
+  return (
+    <html lang="pt-BR" suppressHydrationWarning>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased overflow-y-hidden scrollbar-hide`}
+      >
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          {children}
+          <Toaster richColors />
+        </ThemeProvider>
+      </body>
+    </html>
+  );
+>>>>>>> main
 }

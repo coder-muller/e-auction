@@ -124,21 +124,40 @@ export function Header() {
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                            <DropdownMenuItem className="cursor-pointer">
-                                <div className="flex items-center gap-2">
-                                    <Avatar className="size-8 rounded-md">
-                                        <AvatarImage src="https://placehold.jp/150x150.png" />
-                                        <AvatarFallback>JD</AvatarFallback>
-                                    </Avatar>
-                                    <div className="flex flex-col">
-                                        <div className="flex items-center gap-2">
-                                            <p className="text-sm font-medium">{user?.name}</p>
-                                            <Crown className="size-3 text-yellow-500" />
-                                        </div>
-                                        <p className="text-sm text-muted-foreground">{user?.email}</p>
-                                    </div>
-                                </div>
+                            <Link href="/profile">
+                                <DropdownMenuItem className="cursor-pointer">
+                                    <div className="flex items-center gap-2">
+                                        <Avatar className="size-8 rounded-md">
+                                            <AvatarImage src="https://placehold.jp/150x150.png" />
+                                            <AvatarFallback>JD</AvatarFallback>
+                                        </Avatar>
+                                        <div className="flex flex-col">
+                                            <div className="flex items-center gap-2">
+                                                <p className="text-sm font-medium">{user?.name}</p>
+                                                <Crown className="size-3 text-yellow-500" />
+                                            </div >
+                                            <p className="text-sm text-muted-foreground">{user?.email}</p>
+                                        </div >
+                                    </div >
+                                </DropdownMenuItem>
+                            </Link>
+                            <DropdownMenuSeparator />
+                            <Link href="/new-auction">
+                                <DropdownMenuItem className="group cursor-pointer">
+                                    <PlusCircle />
+                                    Create Auction
+                                </DropdownMenuItem>
+                            </Link>
+                            <DropdownMenuItem onClick={handleToggleTheme} className="group cursor-pointer">
+                                <Sun className="dark:block hidden group-hover:rotate-90 transition-transform duration-300 ease-in-out" />
+                                <Moon className="block dark:hidden group-hover:rotate-360 transition-transform duration-300 ease-in-out" />
+                                Toggle Theme
                             </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem className="hover:text-destructive focus:text-destructive group transition-colors duration-300 cursor-pointer">
+                                <LogOut className="group-hover:text-destructive group-focus:text-destructive transition-colors duration-300" />
+                                Logout
+                            </DropdownMenuItem >
                             <DropdownMenuSeparator />
                             <DropdownMenuItem className="group cursor-pointer">
                                 <PlusCircle />
@@ -156,9 +175,9 @@ export function Header() {
                                     Logout
                                 </Button>
                             </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                </div>
+                        </DropdownMenuContent >
+                    </DropdownMenu >
+                </div >
                 :
                 <Button asChild>
                     <Link href="/login">
@@ -167,6 +186,6 @@ export function Header() {
                     </Link>
                 </Button>
             }
-        </div>
+        </div >
     )
 }
