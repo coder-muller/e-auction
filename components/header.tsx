@@ -105,10 +105,12 @@ export function Header() {
                             </div>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem className="group cursor-pointer">
-                            <PlusCircle />
-                            Create Auction
-                        </DropdownMenuItem>
+                        <Link href="/new-auction">
+                            <DropdownMenuItem className="group cursor-pointer">
+                                <PlusCircle />
+                                Create Auction
+                            </DropdownMenuItem>
+                        </Link>
                         <DropdownMenuItem onClick={handleToggleTheme} className="group cursor-pointer">
                             <Sun className="dark:block hidden group-hover:rotate-90 transition-transform duration-300 ease-in-out" />
                             <Moon className="block dark:hidden group-hover:rotate-360 transition-transform duration-300 ease-in-out" />

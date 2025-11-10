@@ -6,7 +6,7 @@ export default function HomeLayout({
     children: React.ReactNode;
 }) {
     return (
-        <div className="w-full h-screen flex flex-col">
+        <div className="w-full h-screen flex flex-col overflow-y-hidden scrollbar-hide">
             {/* header */}
             <Header />
 
