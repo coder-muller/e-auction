@@ -134,6 +134,9 @@ export default function AuctionPage({ params }: AuctionPageProps) {
 
     const form = useForm<z.infer<typeof bidFormSchema>>({
         resolver: zodResolver(bidFormSchema),
+        defaultValues: {
+            amount: ""
+        }
     })
 
     const handleBidSubmit = async () => {

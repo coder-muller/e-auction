@@ -94,7 +94,7 @@ export const placeBid = mutation({
             itemId: data.itemId
         })
 
-        return { success: true, bidId, message: "Bid placed successfully" };
+        return { success: true, bidId, message: "Lance criado com sucesso!" };
     },
 });
 

@@ -8,7 +8,7 @@ import { useState, useEffect } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
 
-function CountdownTimer({ endTime }: { endTime: string }) {
+function CountdownTimer({ endTime }: { endTime: number }) {
     const [timeLeft, setTimeLeft] = useState<string>("");
     useEffect(() => {
         const end = new Date(endTime).getTime()
@@ -42,12 +42,12 @@ export function EndingSoonTab({ auctions }: EndingSoonTabProps) {
     return (
         <>
             {auctions
-                .sort((a, b) => a.expiringAt - b.expiringAt)
+                .sort((a, b) => new Date(a.expiringAt).getTime() - new Date(b.expiringAt).getTime())
                 .map((auction) => (
                     <Card key={auction._id} className="overflow-hidden p-0 hover:shadow-lg transition-shadow">
                         <div className="relative aspect-[4/3] w-full">
                             <Image
-                                src={auction.imageUrl || "https://placehold.jp/150x150png"}
+                                src={auction.imageUrl ? auction.imageUrl[0] : "https://placehold.jp/150x150png"}
                                 alt={auction.title}
                                 fill
                                 unoptimized
@@ -58,7 +58,7 @@ export function EndingSoonTab({ auctions }: EndingSoonTabProps) {
                         <CardHeader className="gap-2">
                             <CardTitle className="text-base">{auction.title}</CardTitle>
                             <CardDescription className="text-xs text-muted-foreground">
-                                {auction.description}
+                                <pre className="overflow-x-clip">{auction.description}</pre>
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="h-full space-y-3 pb-6 flex flex-col justify-end">

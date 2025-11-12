@@ -16,6 +16,7 @@ import { api } from "@/convex/_generated/api";
 
 export type Auction = {
     _id: string;
+    _creationTime: number;
     title: string;
     city: string;
     state: string;
