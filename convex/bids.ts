@@ -88,6 +88,7 @@ export const placeBid = mutation({
             lastBidValue: args.amount,
             lastBidderId: userId,
             expiringAt: new Date(end).toISOString(),
+            bids: [...(item.bids ?? []), bidId]
         });
 
         await ctx.runMutation(api.watchlist.addToWatchlist, {

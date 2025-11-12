@@ -69,9 +69,19 @@ const applicationTables = {
         name: v.string(),
         email: v.optional(v.string()),
         phone: v.optional(v.string()),
+        profileImage: v.optional(v.string()),
         document: v.optional(v.string()),
         items: v.array(v.id("items")),
-        watchlist: v.array(v.id("items"))
+        watchlist: v.array(v.id("items")),
+        address: v.optional(v.object({
+            street: v.string(),
+            number: v.string(),
+            complement: v.optional(v.string()),
+            neighborhood: v.string(),
+            zipCode: v.string(),
+            city: v.string(),
+            state: v.string()
+        }))
     })
 };
 

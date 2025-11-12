@@ -70,7 +70,7 @@ const VendorInfo = ({ sellerId }: { sellerId: Id<"users"> }) => {
                     </div>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                    {vendor.items.length} vendas realizadas
+                    {vendor.items.length} anúncio(s) no e-Auction
                 </p>
             </CardContent>
         </Card>
@@ -189,9 +189,11 @@ export default function AuctionPage({ params }: AuctionPageProps) {
                 <Card className="col-span-1 lg:col-span-2 overflow-hidden">
                     <CardHeader>
                         <CardTitle className="text-xl font-semibold">{auction.title}</CardTitle>
-                        <CardDescription className="text-sm flex flex-col text-muted-foreground">
+                        <CardDescription className="text-sm gap-2 flex flex-col text-muted-foreground">
                             <span>{auction.city} • {auction.state}</span>
-                            <span>{auction.description}</span>
+                            <pre>
+                                <span>{auction.description}</span>
+                            </pre>
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -255,7 +257,7 @@ export default function AuctionPage({ params }: AuctionPageProps) {
                                                 </FormItem>
                                             )}
                                         />
-                                        <Button disabled={isSubmitting}>{isSubmitting ? <Loader2 className="animate-spin" /> : "dar lance"}</Button>
+                                        <Button disabled={isSubmitting || auction.status === "ended"}>{isSubmitting ? <Loader2 className="animate-spin" /> : "dar lance"}</Button>
                                     </form>
                                 </Form>
                             </div>

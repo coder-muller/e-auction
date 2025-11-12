@@ -3,6 +3,7 @@ import { ConvexError, v } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { paginationOptsValidator } from "convex/server";
 import { internal } from "./_generated/api";
+import { Id } from "./_generated/dataModel";
 
 export const list = query({
     args: {
@@ -123,12 +124,14 @@ export const create = mutation({
     },
     handler: async (ctx, args) => {
         const userId = await getAuthUserId(ctx);
-        if (!userId) throw new Error("Must be logged in");
+        if (!userId) throw new Error("Usuário não logado");
+        const user = await ctx.db.get(userId)
+        if (!user) throw new Error("Usuário não encontrado");
 
         const now = new Date().toISOString();
         const expiringAt = new Date(args.endDate + 'T' + args.endTime).toISOString()
 
-        return await ctx.db.insert("items", {
+        const item: Id<"items"> = await ctx.db.insert("items", {
             title: args.title,
             description: args.description,
             startingPrice: args.startingPrice * 100, // convert to cents
@@ -142,20 +145,23 @@ export const create = mutation({
             category: args.category,
             bids: []
         });
+
+        await ctx.db.patch(userId, {
+            items: [...(user.items ?? []), item]
+        })
     },
 });
 
 export const myItems = query({
-    args: { paginationOpts: paginationOptsValidator },
-    handler: async (ctx, args) => {
+    handler: async (ctx) => {
         const userId = await getAuthUserId(ctx);
-        if (!userId) return { page: [], isDone: true, continueCursor: null };
+        if (!userId) throw new ConvexError("Usuário não logado")
 
         return await ctx.db
             .query("items")
             .withIndex("by_seller", (q) => q.eq("sellerId", userId))
             .order("desc")
-            .paginate(args.paginationOpts);
+            .collect()
     },
 });
 

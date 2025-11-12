@@ -11,23 +11,49 @@ import { SecuritySettings } from "./_components/security-settings"
 import { OwnAuctionsTab } from "./_components/own-auctions-tab"
 import { ParticipatingAuctionsTab } from "./_components/participating-auctions-tab"
 import {
-    mockUser,
-    mockAddress,
     mockSessions,
     mockOwnAuctions,
     mockParticipatingAuctions,
 } from "./_components/mock-data"
 import type { ProfileFormValues, AddressFormValues, PaymentFormValues } from "./_components/schemas"
+import { useMutation, useQuery } from "convex/react"
+import { api } from "@/convex/_generated/api"
+import { ConvexError } from "convex/values"
+import { toast } from "sonner"
 
 export default function ProfilePage() {
-    const handleProfileSubmit = (data: ProfileFormValues) => {
-        console.log("Profile data:", data)
-        // Aqui você fará a chamada à API
+
+    const user = useQuery(api.users.getLoggedInUser)
+    const auctions = useQuery(api.items.myItems)
+    const profileEdit = useMutation(api.users.profileEdit)
+    const addressEdit = useMutation(api.users.addressEdit)
+
+    if (user === undefined) return <p>carregando...</p>
+    if (auctions === undefined) return <p>carregando...</p>
+
+    const handleProfileSubmit = async (data: ProfileFormValues) => {
+        const { phone, name } = data
+
+        try {
+            profileEdit({
+                name,
+                phone
+            })
+            toast.success("Perfil editado com sucesso.")
+        } catch (err) {
+            const error = err instanceof ConvexError ? err.data : "Ocorreu um erro desconhecido"
+            toast.error(error)
+        }
     }
 
     const handleAddressSubmit = (data: AddressFormValues) => {
-        console.log("Address data:", data)
-        // Aqui você fará a chamada à API
+        try {
+            addressEdit(data)
+            toast.success("Endereço editado com sucesso.")
+        } catch (err) {
+            const error = err instanceof ConvexError ? err.data : "Ocorreu um erro desconhecido"
+            toast.error(error)
+        }
     }
 
     const handlePaymentSubmit = (data: PaymentFormValues) => {
@@ -62,7 +88,12 @@ export default function ProfilePage() {
 
     return (
         <div className="flex flex-col gap-6 max-w-6xl mx-auto">
-            <ProfileHeader user={mockUser} />
+            <ProfileHeader user={{
+                name: user.name,
+                email: user.email,
+                phone: user.phone,
+                avatar: user.profileImage ?? "https://placehold.jp/150x150png"
+            }} />
 
             <Tabs defaultValue="profile" className="w-full">
                 <TabsList className="grid w-full grid-cols-4">
@@ -85,22 +116,26 @@ export default function ProfilePage() {
                 </TabsList>
 
                 <TabsContent value="profile" className="space-y-4">
-                    <ProfileInfoForm defaultValues={mockUser} onSubmit={handleProfileSubmit} />
+                    <ProfileInfoForm defaultValues={{
+                        email: user.email,
+                        name: user.name,
+                        phone: user.phone
+                    }} onSubmit={handleProfileSubmit} />
                 </TabsContent>
 
                 <TabsContent value="address" className="space-y-4">
-                    <AddressForm defaultValues={mockAddress} onSubmit={handleAddressSubmit} />
+                    <AddressForm defaultValues={user.address} onSubmit={handleAddressSubmit} />
                 </TabsContent>
 
                 <TabsContent value="auctions" className="space-y-4">
                     <Tabs defaultValue="own" className="w-full">
                         <TabsList>
                             <TabsTrigger value="own">Meus Leilões</TabsTrigger>
-                            <TabsTrigger value="participating">Participando</TabsTrigger>
+                            <TabsTrigger value="participating">Lista de Desejos</TabsTrigger>
                         </TabsList>
 
                         <TabsContent value="own" className="space-y-4">
-                            <OwnAuctionsTab auctions={mockOwnAuctions} onViewDetails={handleViewAuctionDetails} />
+                            <OwnAuctionsTab auctions={auctions} onViewDetails={handleViewAuctionDetails} />
                         </TabsContent>
 
                         <TabsContent value="participating" className="space-y-4">
