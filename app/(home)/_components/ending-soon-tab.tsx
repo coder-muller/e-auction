@@ -8,12 +8,13 @@ import { useState, useEffect } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
 
-function CountdownTimer({ endTime }: { endTime: number }) {
+function CountdownTimer({ endTime }: { endTime: string }) {
     const [timeLeft, setTimeLeft] = useState<string>("");
     useEffect(() => {
+        const end = new Date(endTime).getTime()
         const timer = setInterval(() => {
             const now = new Date().getTime();
-            const distance = endTime - now;
+            const distance = end - now;
 
             if (distance > 0) {
                 const days = Math.floor(distance / (1000 * 60 * 60 * 24));
@@ -23,7 +24,7 @@ function CountdownTimer({ endTime }: { endTime: number }) {
 
                 setTimeLeft(`${days > 0 ? `${days}d ` : ""}${hours > 0 ? `${hours}h ` : ""}${minutes > 0 ? `${minutes}m ` : ""}${seconds > 0 ? `${seconds}s ` : ""}`);
             } else {
-                setTimeLeft("Ended");
+                setTimeLeft("Encerrado");
                 clearInterval(timer);
             }
         }, 1000);

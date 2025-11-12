@@ -16,10 +16,16 @@ import {
     auctionSchema,
     type AuctionFormValues,
 } from "./_components"
+import { useMutation } from "convex/react"
+import { api } from "@/convex/_generated/api"
+import { useRouter } from "next/navigation"
 
 export default function NewAuctionPage() {
     const [imagePreviews, setImagePreviews] = useState<string[]>([])
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const router = useRouter()
+
+    const createItem = useMutation(api.items.create)
 
     const form = useForm<AuctionFormValues>({
         resolver: zodResolver(auctionSchema),
@@ -28,7 +34,7 @@ export default function NewAuctionPage() {
             description: "",
             category: "",
             condition: "",
-            startingPrice: 0,
+            startingPrice: "",
             city: "",
             state: "",
             endDate: "",
@@ -40,16 +46,23 @@ export default function NewAuctionPage() {
 
     const onSubmit = async (data: AuctionFormValues) => {
         setIsSubmitting(true)
+        const raw = data.startingPrice.replace(/\D/g, ""); // só números
         try {
-            // Simular upload de imagens e criação do leilão
-            await new Promise((resolve) => setTimeout(resolve, 2000))
-
-            console.log("Auction data:", data)
+            await createItem({
+                category: data.category,
+                city: data.city,
+                description: data.description,
+                endDate: data.endDate,
+                endTime: data.endTime,
+                startingPrice: Number(raw),
+                state: data.state,
+                title: data.title
+            })
+            console.log(data)
             toast.success("Leilão criado com sucesso!")
-
-            // Reset form
             form.reset()
             setImagePreviews([])
+            router.push("/")
         } catch {
             toast.error("Erro ao criar leilão. Tente novamente.")
         } finally {

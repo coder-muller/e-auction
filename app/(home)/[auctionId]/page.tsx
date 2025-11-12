@@ -6,7 +6,6 @@ import { Input } from "@/components/ui/input";
 import { ArrowLeft, Loader2, TriangleAlert } from "lucide-react";
 import Link from "next/link";
 import { useEffect, use, useState } from "react";
-import { auctions, vendors, bidHistory } from "@/lib/fake-data";
 import Image from "next/image";
 import { Star, User } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,17 +17,19 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
+import { ConvexError } from "convex/values";
 
 const bidFormSchema = z.object({
     amount: z.string()
 });
 
-function CountdownTimer({ endTime }: { endTime: number }) {
+function CountdownTimer({ endTime }: { endTime: string }) {
     const [timeLeft, setTimeLeft] = useState<string>("");
     useEffect(() => {
+        const end = new Date(endTime).getTime()
         const timer = setInterval(() => {
             const now = new Date().getTime();
-            const distance = endTime - now;
+            const distance = end - now;
 
             if (distance > 0) {
                 const days = Math.floor(distance / (1000 * 60 * 60 * 24));
@@ -106,7 +107,7 @@ function BidHistory({ auctionId }: { auctionId: Id<"items"> }) {
                                 <p className="text-xs text-muted-foreground">{new Date(bid._creationTime).toLocaleString()}</p>
                             </div>
                             <span className="font-semibold">
-                                {(bid.amount / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+                                {(bid.amount / 10000).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
                             </span>
                         </div>
                     ))}
@@ -135,13 +136,11 @@ export default function AuctionPage({ params }: AuctionPageProps) {
         resolver: zodResolver(bidFormSchema),
     })
 
-    const handleBidSubmit = async (data: z.infer<typeof bidFormSchema>) => {
+    const handleBidSubmit = async () => {
         if (!auction) return;
-        const cleanedString = data.amount.replace(/[^\d,]/g, '').replace(',', '.')
+        const input = Number(bidAmount) * 100
 
-        const valueAsFloat = parseFloat(cleanedString)
-
-        if (isNaN(valueAsFloat) || valueAsFloat <= 0) {
+        if (isNaN(input) || input <= 0) {
             form.setError("amount", { message: "valor inválido" })
             toast.error("Por favor, insira um valor válido")
             return
@@ -150,12 +149,11 @@ export default function AuctionPage({ params }: AuctionPageProps) {
         setIsSubmitting(true);
 
         try {
-            const response = placeBid({ amount: valueAsFloat, itemId: auctionId })
-            console.log(await response)
+            const response = placeBid({ amount: input, itemId: auctionId })
             toast.success((await response).message);
             setBidAmount("");
         } catch (err) {
-            const error = err instanceof Error ? err.message : "Ocorreu um erro desconhecido"
+            const error = err instanceof ConvexError ? err.data : "Ocorreu um erro desconhecido"
             toast.error(error);
         } finally {
             setIsSubmitting(false);
@@ -170,8 +168,6 @@ export default function AuctionPage({ params }: AuctionPageProps) {
             </div>
         );
     }
-
-    const isEnded = new Date() > new Date(auction.expiringAt);
 
     return (
         <div className="flex flex-col gap-4">
@@ -217,7 +213,7 @@ export default function AuctionPage({ params }: AuctionPageProps) {
                             <CardTitle className="text-xl font-semibold">Dê um lance</CardTitle>
                             {auction.lastBidValue &&
                                 <CardDescription>
-                                    Lance atual: {(auction.lastBidValue / 1000).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+                                    Lance atual: {(auction.lastBidValue / 10000).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
                                 </CardDescription>
                             }
                         </CardHeader>
@@ -232,7 +228,25 @@ export default function AuctionPage({ params }: AuctionPageProps) {
                                                 <FormItem>
                                                     <FormLabel hidden>valor do lance</FormLabel>
                                                     <FormControl>
-                                                        <Input type="text" inputMode="decimal" placeholder="R$ 0,00" {...field} />
+                                                        <Input
+                                                            {...field}
+                                                            inputMode="numeric"
+                                                            placeholder="R$ 0,00"
+                                                            onChange={(e) => {
+                                                                const raw = e.target.value.replace(/\D/g, ""); // só números
+                                                                const cents = Number(raw) / 100;
+
+                                                                const formatted = cents.toLocaleString("pt-BR", {
+                                                                    style: "currency",
+                                                                    currency: "BRL",
+                                                                });
+
+                                                                field.onChange(formatted);
+
+                                                                e.target.setSelectionRange(formatted.length, formatted.length);
+                                                                setBidAmount(raw)
+                                                            }}
+                                                        />
                                                     </FormControl>
                                                     <FormMessage />
                                                 </FormItem>

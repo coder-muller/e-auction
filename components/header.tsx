@@ -40,7 +40,7 @@ export function Header() {
 
     const handleLogOut = async () => {
         await signOut()
-        router.refresh()
+        router.push("/")
         toast("saindo...")
     }
 
@@ -148,21 +148,6 @@ export function Header() {
                                     Create Auction
                                 </DropdownMenuItem>
                             </Link>
-                            <DropdownMenuItem onClick={handleToggleTheme} className="group cursor-pointer">
-                                <Sun className="dark:block hidden group-hover:rotate-90 transition-transform duration-300 ease-in-out" />
-                                <Moon className="block dark:hidden group-hover:rotate-360 transition-transform duration-300 ease-in-out" />
-                                Toggle Theme
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem className="hover:text-destructive focus:text-destructive group transition-colors duration-300 cursor-pointer">
-                                <LogOut className="group-hover:text-destructive group-focus:text-destructive transition-colors duration-300" />
-                                Logout
-                            </DropdownMenuItem >
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem className="group cursor-pointer">
-                                <PlusCircle />
-                                Create Auction
-                            </DropdownMenuItem>
                             <DropdownMenuItem onClick={handleToggleTheme} className="group cursor-pointer">
                                 <Sun className="dark:block hidden group-hover:rotate-90 transition-transform duration-300 ease-in-out" />
                                 <Moon className="block dark:hidden group-hover:rotate-360 transition-transform duration-300 ease-in-out" />

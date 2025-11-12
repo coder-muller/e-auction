@@ -116,14 +116,17 @@ export const create = mutation({
         description: v.string(),
         startingPrice: v.number(),
         category: v.string(),
-        durationHours: v.number(),
+        endDate: v.string(),
+        endTime: v.string(),
+        state: v.string(),
+        city: v.string()
     },
     handler: async (ctx, args) => {
         const userId = await getAuthUserId(ctx);
         if (!userId) throw new Error("Must be logged in");
 
-        const now = Date.now();
-        const expiringAt = now + (args.durationHours * 60 * 60 * 1000);
+        const now = new Date().toISOString();
+        const expiringAt = new Date(args.endDate + 'T' + args.endTime).toISOString()
 
         return await ctx.db.insert("items", {
             title: args.title,
@@ -134,6 +137,8 @@ export const create = mutation({
             status: "live",
             startingAt: now,
             expiringAt,
+            state: args.state,
+            city: args.city,
             category: args.category,
             bids: []
         });

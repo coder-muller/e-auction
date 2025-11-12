@@ -1,5 +1,5 @@
 import { query, mutation } from "./_generated/server";
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { paginationOptsValidator } from "convex/server";
 import { api, internal } from "./_generated/api";
@@ -7,7 +7,7 @@ import { api, internal } from "./_generated/api";
 export const placeBid = mutation({
     args: {
         itemId: v.id("items"),
-        amount: v.number(), // in dollars
+        amount: v.number(), // in cents
     },
     handler: async (ctx, args) => {
         const userId = await getAuthUserId(ctx);
@@ -24,41 +24,40 @@ export const placeBid = mutation({
         }
 
         const item = await ctx.db.get(args.itemId);
-        if (!item) throw new Error("Item not found");
+        if (!item) throw new Error("Item não encontrado");
 
-        const now = Date.now();
-        const amountInCents = Math.round(args.amount * 100);
+        const now = Date.now()
 
         // Validate bid
         if (item.status !== "live") {
-            throw new Error("Auction is not live");
+            throw new ConvexError("O leilão não está ativo no momento.");
         }
 
-        if (now >= item.expiringAt) {
-            throw new Error("Auction has ended");
+        if (now >= new Date(item.expiringAt).getTime()) {
+            throw new ConvexError("O leilão já foi encerrado.");
         }
 
-        if (amountInCents <= item.lastBidValue) {
-            throw new Error(`Bid must be higher than $${(item.lastBidValue / 100).toFixed(2)}`);
+        if (args.amount <= item.lastBidValue) {
+            throw new ConvexError("O valor não pode ser menor que o valor atual.");
         }
 
         if (item.sellerId === userId) {
-            throw new Error("Cannot bid on your own item");
+            throw new ConvexError("Não é possível dar um lance no seu próprio anúncio.");
         }
 
         // Atomic operation: insert bid + update item
         const bidId = await ctx.db.insert("bids", {
             itemId: args.itemId,
             bidderId: userId,
-            amount: amountInCents,
+            amount: args.amount,
             clientBidId: userId,
         });
 
         // Anti-sniping: extend auction if bid placed in last 5 minutes
-        let newExpiringAt = item.expiringAt;
-        const timeLeft = item.expiringAt - now;
+        let end = new Date(item.expiringAt).getTime();
+        const timeLeft = end - now;
         if (timeLeft < 5 * 60 * 1000) { // 5 minutes
-            newExpiringAt = now + 5 * 60 * 1000; // extend by 5 minutes
+            end = now + 5 * 60 * 1000; // extend by 5 minutes
         }
 
         const data = {
@@ -86,9 +85,9 @@ export const placeBid = mutation({
         }
 
         await ctx.db.patch(args.itemId, {
-            lastBidValue: amountInCents,
+            lastBidValue: args.amount,
             lastBidderId: userId,
-            expiringAt: newExpiringAt,
+            expiringAt: new Date(end).toISOString(),
         });
 
         await ctx.runMutation(api.watchlist.addToWatchlist, {

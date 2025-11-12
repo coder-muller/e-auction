@@ -17,11 +17,11 @@ import { api } from "@/convex/_generated/api";
 export type Auction = {
     _id: string;
     title: string;
-    // city: string;
-    // state: string;
+    city: string;
+    state: string;
     currentBid?: number;
     expiringAt: number;
-    imageUrl: string;
+    imageUrl?: string[];
     description: string
 }
 

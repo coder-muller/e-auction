@@ -6,20 +6,24 @@ const applicationTables = {
     items: defineTable({
         title: v.string(),
         description: v.string(),
-        imageUrl: v.optional(v.string()),
+        imageUrl: v.optional(v.array(v.string())),
         startingPrice: v.number(), // in cents
         lastBidValue: v.number(), // in cents, denormalized
         lastBidderId: v.optional(v.id("users")),
         sellerId: v.id("users"),
         status: v.union(v.literal("draft"), v.literal("live"), v.literal("ended")),
-        startingAt: v.number(),
+        startingAt: v.string(),
         bids: v.array(v.id("bids")),
-        expiringAt: v.number(), // denormalized for quick access
+        expiringAt: v.string(),
         winnerId: v.optional(v.id("users")),
         category: v.string(),
+        state: v.string(),
+        city: v.string()
     })
         .index("by_status_expiringAt", ["status", "expiringAt"])
         .index("by_seller", ["sellerId"])
+        .index("by_state", ["state"])
+        .index("by_city", ["city"])
         .index("by_category_status", ["category", "status"]),
 
     bids: defineTable({
