@@ -14,6 +14,7 @@ import { Moon } from "lucide-react";
 import { User } from "lucide-react";
 import { useTheme } from "next-themes";
 import Link from "next/link";
+import { useState } from "react";
 
 export function Header() {
     const { setTheme, theme } = useTheme();
@@ -21,6 +22,8 @@ export function Header() {
     const handleToggleTheme = () => {
         setTheme(theme === "dark" ? "light" : "dark");
     }
+
+    const [hasNotification, setHasNotification] = useState(true);
 
     return (
         <div className="w-full flex justify-between items-center p-4 border-b border-border">
@@ -30,9 +33,14 @@ export function Header() {
             <div className="flex items-center gap-2">
                 <Popover>
                     <PopoverTrigger asChild>
-                        <Button variant="ghost">
-                            <Bell />
-                        </Button>
+                            <Button variant="ghost" className="relative">
+                                <Bell />
+                                {hasNotification && (
+                                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+                                        <span className="text-xs">1</span>
+                                    </span>
+                                )}
+                            </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-80 p-4" align="end">
                         <div>

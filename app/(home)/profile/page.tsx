@@ -64,7 +64,7 @@ export default function ProfilePage() {
         <div className="flex flex-col gap-6 max-w-6xl mx-auto">
             <ProfileHeader user={mockUser} />
 
-            <Tabs defaultValue="profile" className="w-full">
+            <Tabs defaultValue="profile" className="w-full flex flex-col gap-4">
                 <TabsList className="grid w-full grid-cols-4">
                     <TabsTrigger value="profile">
                         <User className="size-4" />
