@@ -43,7 +43,7 @@ export function OwnAuctionsTab({ auctions, onViewDetails }: OwnAuctionsTabProps)
                                         <Clock className="size-3" />
                                         {new Date(auction.expiringAt).toLocaleString('pt-BR')}
                                     </span>
-                                    <span>{auction.bids ?? [].length} lances</span>
+                                    <span>{auction.bids.length ?? [].length} lance(s)</span>
                                 </div>
                             </div>
                             <Button variant="outline" size="sm" onClick={() => onViewDetails?.(auction._id)}>

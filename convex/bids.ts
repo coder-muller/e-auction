@@ -11,7 +11,7 @@ export const placeBid = mutation({
     },
     handler: async (ctx, args) => {
         const userId = await getAuthUserId(ctx);
-        if (!userId) throw new Error("Must be logged in");
+        if (!userId) throw new ConvexError("É necessário estar logado para dar um lance");
 
         // Check for duplicate bid using clientBidId
         const existingBid = await ctx.db

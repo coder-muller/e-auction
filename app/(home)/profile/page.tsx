@@ -20,16 +20,18 @@ import { useMutation, useQuery } from "convex/react"
 import { api } from "@/convex/_generated/api"
 import { ConvexError } from "convex/values"
 import { toast } from "sonner"
+import { useRouter } from "next/navigation"
 
 export default function ProfilePage() {
 
     const user = useQuery(api.users.getLoggedInUser)
-    const auctions = useQuery(api.items.myItems)
+    const ownAuctions = useQuery(api.items.myItems)
     const profileEdit = useMutation(api.users.profileEdit)
     const addressEdit = useMutation(api.users.addressEdit)
+    const router = useRouter()
 
     if (user === undefined) return <p>carregando...</p>
-    if (auctions === undefined) return <p>carregando...</p>
+    if (ownAuctions === undefined) return <p>carregando...</p>
 
     const handleProfileSubmit = async (data: ProfileFormValues) => {
         const { phone, name } = data
@@ -77,8 +79,8 @@ export default function ProfilePage() {
     }
 
     const handleViewAuctionDetails = (auctionId: string) => {
-        console.log("Viewing auction:", auctionId)
-        // Aqui você navegará para a página de detalhes
+        router.push(`/${auctionId}`)
+
     }
 
     const handlePlaceBid = (auctionId: string) => {
@@ -96,7 +98,7 @@ export default function ProfilePage() {
             }} />
 
             <Tabs defaultValue="profile" className="w-full">
-                <TabsList className="grid w-full grid-cols-4">
+                <TabsList className="grid w-full grid-cols-2">
                     <TabsTrigger value="profile">
                         <User className="size-4" />
                         Perfil
@@ -105,6 +107,8 @@ export default function ProfilePage() {
                         <TrendingUp className="size-4" />
                         Leilões
                     </TabsTrigger>
+                    {
+                        /*
                     <TabsTrigger value="account">
                         <Shield className="size-4" />
                         Conta
@@ -113,6 +117,8 @@ export default function ProfilePage() {
                         <MapPin className="size-4" />
                         Endereço
                     </TabsTrigger>
+                    */
+                    }
                 </TabsList>
 
                 <TabsContent value="profile" className="space-y-4">
@@ -123,9 +129,13 @@ export default function ProfilePage() {
                     }} onSubmit={handleProfileSubmit} />
                 </TabsContent>
 
+                {
+                    /*
                 <TabsContent value="address" className="space-y-4">
                     <AddressForm defaultValues={user.address} onSubmit={handleAddressSubmit} />
                 </TabsContent>
+                    */
+                }
 
                 <TabsContent value="auctions" className="space-y-4">
                     <Tabs defaultValue="own" className="w-full">
@@ -135,7 +145,7 @@ export default function ProfilePage() {
                         </TabsList>
 
                         <TabsContent value="own" className="space-y-4">
-                            <OwnAuctionsTab auctions={auctions} onViewDetails={handleViewAuctionDetails} />
+                            <OwnAuctionsTab auctions={ownAuctions} onViewDetails={handleViewAuctionDetails} />
                         </TabsContent>
 
                         <TabsContent value="participating" className="space-y-4">
@@ -147,7 +157,9 @@ export default function ProfilePage() {
                     </Tabs>
                 </TabsContent>
 
-                <TabsContent value="account" className="space-y-4">
+                {
+                    /*
+                    <TabsContent value="account" className="space-y-4">
                     <PaymentForm
                         defaultValues={{
                             cardNumber: "1234 5678 9012 3456",
@@ -163,7 +175,9 @@ export default function ProfilePage() {
                         onTwoFactorChange={handleTwoFactorChange}
                         onDeleteAccount={handleDeleteAccount}
                     />
-                </TabsContent>
+                    </TabsContent>
+                    */
+                }
             </Tabs>
         </div>
     )
