@@ -1,15 +1,13 @@
-import { query, mutation, internalMutation } from "./_generated/server";
-import { v } from "convex/values";
+import { query, mutation } from "./_generated/server";
+import { ConvexError, v } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { paginationOptsValidator } from "convex/server";
-import { createNotification } from "./notifications";
 import { api, internal } from "./_generated/api";
 
 export const placeBid = mutation({
     args: {
         itemId: v.id("items"),
-        amount: v.number(), // in dollars
-        clientBidId: v.string(),
+        amount: v.number(), // in cents
     },
     handler: async (ctx, args) => {
         const userId = await getAuthUserId(ctx);
@@ -18,49 +16,48 @@ export const placeBid = mutation({
         // Check for duplicate bid using clientBidId
         const existingBid = await ctx.db
             .query("bids")
-            .withIndex("by_client_bid_id", (q) => q.eq("clientBidId", args.clientBidId))
+            .withIndex("by_client_bid_id", (q) => q.eq("clientBidId", userId))
             .first();
 
-        if (existingBid) {
-            return { success: true, bidId: existingBid._id, message: "Bid already placed" };
+        if (existingBid?.amount === args.amount) {
+            throw new Error("Lance já realizado.")
         }
 
         const item = await ctx.db.get(args.itemId);
-        if (!item) throw new Error("Item not found");
+        if (!item) throw new Error("Item não encontrado");
 
-        const now = Date.now();
-        const amountInCents = Math.round(args.amount * 100);
+        const now = Date.now()
 
         // Validate bid
         if (item.status !== "live") {
-            throw new Error("Auction is not live");
+            throw new ConvexError("O leilão não está ativo no momento.");
         }
 
-        if (now >= item.expiringAt) {
-            throw new Error("Auction has ended");
+        if (now >= new Date(item.expiringAt).getTime()) {
+            throw new ConvexError("O leilão já foi encerrado.");
         }
 
-        if (amountInCents <= item.lastBidValue) {
-            throw new Error(`Bid must be higher than $${(item.lastBidValue / 100).toFixed(2)}`);
+        if (args.amount <= item.lastBidValue) {
+            throw new ConvexError("O valor não pode ser menor que o valor atual.");
         }
 
         if (item.sellerId === userId) {
-            throw new Error("Cannot bid on your own item");
+            throw new ConvexError("Não é possível dar um lance no seu próprio anúncio.");
         }
 
         // Atomic operation: insert bid + update item
         const bidId = await ctx.db.insert("bids", {
             itemId: args.itemId,
             bidderId: userId,
-            amount: amountInCents,
-            clientBidId: args.clientBidId,
+            amount: args.amount,
+            clientBidId: userId,
         });
 
         // Anti-sniping: extend auction if bid placed in last 5 minutes
-        let newExpiringAt = item.expiringAt;
-        const timeLeft = item.expiringAt - now;
+        let end = new Date(item.expiringAt).getTime();
+        const timeLeft = end - now;
         if (timeLeft < 5 * 60 * 1000) { // 5 minutes
-            newExpiringAt = now + 5 * 60 * 1000; // extend by 5 minutes
+            end = now + 5 * 60 * 1000; // extend by 5 minutes
         }
 
         const data = {
@@ -88,34 +85,34 @@ export const placeBid = mutation({
         }
 
         await ctx.db.patch(args.itemId, {
-            lastBidValue: amountInCents,
+            lastBidValue: args.amount,
             lastBidderId: userId,
-            expiringAt: newExpiringAt,
+            expiringAt: new Date(end).toISOString(),
+            bids: [...(item.bids ?? []), bidId]
         });
 
         await ctx.runMutation(api.watchlist.addToWatchlist, {
             itemId: data.itemId
         })
 
-        return { success: true, bidId, message: "Bid placed successfully" };
+        return { success: true, bidId, message: "Lance criado com sucesso!" };
     },
 });
 
 export const getBidHistory = query({
     args: {
         itemId: v.id("items"),
-        paginationOpts: paginationOptsValidator,
     },
     handler: async (ctx, args) => {
         const bids = await ctx.db
             .query("bids")
             .withIndex("by_item", (q) => q.eq("itemId", args.itemId))
             .order("desc")
-            .paginate(args.paginationOpts);
+            .take(3)
 
         // Enrich with bidder info
         const enrichedBids = await Promise.all(
-            bids.page.map(async (bid) => {
+            bids.map(async (bid) => {
                 const bidder = await ctx.db.get(bid.bidderId);
                 return {
                     ...bid,
@@ -125,8 +122,7 @@ export const getBidHistory = query({
         );
 
         return {
-            ...bids,
-            page: enrichedBids,
+            enrichedBids,
         };
     },
 });

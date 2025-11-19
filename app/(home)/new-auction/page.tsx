@@ -16,10 +16,23 @@ import {
     auctionSchema,
     type AuctionFormValues,
 } from "./_components"
+import { useMutation, } from "convex/react"
+import { api } from "@/convex/_generated/api"
+import { useRouter } from "next/navigation"
+import { Id } from "@/convex/_generated/dataModel"
+
 
 export default function NewAuctionPage() {
     const [imagePreviews, setImagePreviews] = useState<string[]>([])
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const router = useRouter()
+
+    const createItem = useMutation(api.items.create)
+    const generateUploadUrl = useMutation(api.items.generateUploadUrl);
+
+
+
+
 
     const form = useForm<AuctionFormValues>({
         resolver: zodResolver(auctionSchema),
@@ -28,7 +41,7 @@ export default function NewAuctionPage() {
             description: "",
             category: "",
             condition: "",
-            startingPrice: 0,
+            startingPrice: "",
             city: "",
             state: "",
             endDate: "",
@@ -40,17 +53,46 @@ export default function NewAuctionPage() {
 
     const onSubmit = async (data: AuctionFormValues) => {
         setIsSubmitting(true)
+        const raw = data.startingPrice.replace(/\D/g, ""); // só números
         try {
-            // Simular upload de imagens e criação do leilão
-            await new Promise((resolve) => setTimeout(resolve, 2000))
+            let uploadedStorageIds: Id<"_storage">[] = [];
 
-            console.log("Auction data:", data)
+            if (data.images && data.images.length > 0) {
+                const file = data.images[0] as File; 
+                const postUrl = await generateUploadUrl();
+                const result = await fetch(postUrl, {
+                    method: "POST",
+                    headers: { "Content-Type": file.type },
+                    body: file,
+                });
+
+                if (!result.ok) {
+                    throw new Error(`Upload failed: ${result.statusText}`);
+                }
+
+                const { storageId } = await result.json();
+                uploadedStorageIds = [storageId];
+            }
+
+            await createItem({
+                category: data.category,
+                city: data.city,
+                description: data.description,
+                endDate: data.endDate,
+                endTime: data.endTime,
+                startingPrice: Number(raw),
+                state: data.state,
+                title: data.title,
+                imageStorageIds: uploadedStorageIds, 
+            })
+
+            console.log(data)
             toast.success("Leilão criado com sucesso!")
-
-            // Reset form
             form.reset()
             setImagePreviews([])
-        } catch {
+            router.push("/")
+        } catch (error) {
+            console.error(error);
             toast.error("Erro ao criar leilão. Tente novamente.")
         } finally {
             setIsSubmitting(false)

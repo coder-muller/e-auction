@@ -8,12 +8,13 @@ import { useState, useEffect } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
 
-function CountdownTimer({ endTime }: { endTime: Date }) {
+function CountdownTimer({ endTime }: { endTime: number }) {
     const [timeLeft, setTimeLeft] = useState<string>("");
     useEffect(() => {
+        const end = new Date(endTime).getTime()
         const timer = setInterval(() => {
             const now = new Date().getTime();
-            const distance = endTime.getTime() - now;
+            const distance = end - now;
 
             if (distance > 0) {
                 const days = Math.floor(distance / (1000 * 60 * 60 * 24));
@@ -23,7 +24,7 @@ function CountdownTimer({ endTime }: { endTime: Date }) {
 
                 setTimeLeft(`${days > 0 ? `${days}d ` : ""}${hours > 0 ? `${hours}h ` : ""}${minutes > 0 ? `${minutes}m ` : ""}${seconds > 0 ? `${seconds}s ` : ""}`);
             } else {
-                setTimeLeft("Ended");
+                setTimeLeft("Encerrado");
                 clearInterval(timer);
             }
         }, 1000);
@@ -41,12 +42,12 @@ export function NewestTab({ auctions }: NewestTabProps) {
     return (
         <>
             {auctions
-                .sort((a, b) => b.id - a.id)
+                .sort((a, b) => new Date(b._creationTime).getTime() - new Date(a._creationTime).getTime())
                 .map((auction) => (
-                    <Card key={auction.id} className="overflow-hidden p-0 hover:shadow-lg transition-shadow">
+                    <Card key={auction._id} className="overflow-hidden p-0 hover:shadow-lg transition-shadow">
                         <div className="relative aspect-[4/3] w-full">
                             <Image
-                                src={auction.imageUrl}
+                                src={auction.imageUrl || "https://placehold.jp/150x150.png"}
                                 alt={auction.title}
                                 fill
                                 unoptimized
@@ -57,23 +58,25 @@ export function NewestTab({ auctions }: NewestTabProps) {
                         <CardHeader className="gap-2">
                             <CardTitle className="text-base">{auction.title}</CardTitle>
                             <CardDescription className="text-xs text-muted-foreground">
-                                {auction.city} • {auction.state}
+                                <pre className="overflow-x-clip">{auction.description}</pre>
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="h-full space-y-3 pb-6 flex flex-col justify-end">
                             <div className="flex flex-col items-center justify-between gap-3">
-                                <div className="flex flex-col items-center justify-center font-semibold">
-                                    <span className="text-xs font-normal text-muted-foreground"> ultimo lance</span>
-                                    <span className="text-lg font-semibold">
-                                        {auction.currentBid.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
-                                    </span>
-                                </div>
-                                <Link href={`/${auction.id}`} className="w-full">
+                                {auction.currentBid &&
+                                    <div className="flex flex-col items-center justify-center font-semibold">
+                                        <span className="text-xs font-normal text-muted-foreground"> ultimo lance</span>
+                                        <span className="text-lg font-semibold">
+                                            {auction.currentBid.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+                                        </span>
+                                    </div>
+                                }
+                                <Link href={`/${auction._id}`} className="w-full">
                                     <Button className="shrink-0 w-full">Mais informações</Button>
                                 </Link>
                             </div>
                             <span className="text-xs text-center text-muted-foreground">
-                                Termina em <CountdownTimer endTime={auction.endTime} />
+                                Termina em <CountdownTimer endTime={auction.expiringAt} />
                             </span>
                         </CardContent>
                     </Card>

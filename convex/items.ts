@@ -3,6 +3,7 @@ import { ConvexError, v } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { paginationOptsValidator } from "convex/server";
 import { internal } from "./_generated/api";
+import { Id } from "./_generated/dataModel";
 
 export const list = query({
     args: {
@@ -36,6 +37,25 @@ export const list = query({
     },
 });
 
+export const getAllItems = query({
+    handler: async (ctx) => {
+        const items = await ctx.db.query("items").order("desc").collect();
+        const itemsWithUrl = await Promise.all(
+            items.map(async (item) => {
+                let imageUrl = null;
+                if (item.imageStorageIds && item.imageStorageIds.length > 0) {
+                    imageUrl = await ctx.storage.getUrl(item.imageStorageIds[0]);
+                }
+                return {
+                    ...item,
+                    imageUrl,
+                };
+            })
+        );
+        return itemsWithUrl;
+    }
+});
+
 export const getStatics = query({
     args: { itemIds: v.array(v.id("items")) },
     handler: async (ctx, args) => {
@@ -62,7 +82,7 @@ export const getStatics = query({
 });
 
 // ... rest of the file unchanged
-export const get = query({
+export const getItem = query({
     args: { itemId: v.id("items") },
     handler: async (ctx, args) => {
         const item = await ctx.db.get(args.itemId);
@@ -71,16 +91,38 @@ export const get = query({
         // Get seller info
         const seller = await ctx.db.get(item.sellerId);
 
-        // Get last bidder info if exists
-        let lastBidder = null;
-        if (item.lastBidderId) {
-            lastBidder = await ctx.db.get(item.lastBidderId);
+        let imageUrl = null;
+        if (item.imageStorageIds && item.imageStorageIds.length > 0) {
+            imageUrl = await ctx.storage.getUrl(item.imageStorageIds[0]);
         }
+
+        const bids: any = await Promise.all(
+            item.bids.map(async (b) => {
+                if (!item.bids) return
+                const bid = await ctx.db.query("bids")
+                    .withIndex("by_id", (q) => q.eq("_id", b))
+                    .unique()
+
+                if (!bid) return
+
+                const user = await ctx.db.query("users")
+                    .withIndex("by_id", (q) => q.eq("_id", bid.bidderId))
+                    .unique()
+
+                const amount = bid?.amount
+
+                return {
+                    amount,
+                    user
+                }
+            })
+        )
 
         return {
             ...item,
+            imageUrl,
             seller: seller ? { name: seller.name, email: seller.email } : null,
-            lastBidder: lastBidder ? { name: lastBidder.name } : null,
+            bids: bids ? { bids: bids } : null,
         };
     },
 });
@@ -91,16 +133,22 @@ export const create = mutation({
         description: v.string(),
         startingPrice: v.number(),
         category: v.string(),
-        durationHours: v.number(),
+        endDate: v.string(),
+        endTime: v.string(),
+        state: v.string(),
+        city: v.string(),
+        imageStorageIds: v.optional(v.array(v.id("_storage"))),
     },
     handler: async (ctx, args) => {
         const userId = await getAuthUserId(ctx);
-        if (!userId) throw new Error("Must be logged in");
+        if (!userId) throw new Error("Usuário não logado");
+        const user = await ctx.db.get(userId)
+        if (!user) throw new Error("Usuário não encontrado");
 
-        const now = Date.now();
-        const expiringAt = now + (args.durationHours * 60 * 60 * 1000);
+        const now = new Date().toISOString();
+        const expiringAt = new Date(args.endDate + 'T' + args.endTime).toISOString()
 
-        return await ctx.db.insert("items", {
+        const item: Id<"items"> = await ctx.db.insert("items", {
             title: args.title,
             description: args.description,
             startingPrice: args.startingPrice * 100, // convert to cents
@@ -109,22 +157,29 @@ export const create = mutation({
             status: "live",
             startingAt: now,
             expiringAt,
+            state: args.state,
+            city: args.city,
             category: args.category,
+            bids: [],
+            imageStorageIds: args.imageStorageIds ?? [],
         });
+
+        await ctx.db.patch(userId, {
+            items: [...(user.items ?? []), item]
+        })
     },
 });
 
 export const myItems = query({
-    args: { paginationOpts: paginationOptsValidator },
-    handler: async (ctx, args) => {
+    handler: async (ctx) => {
         const userId = await getAuthUserId(ctx);
-        if (!userId) return { page: [], isDone: true, continueCursor: null };
+        if (!userId) throw new ConvexError("Usuário não logado")
 
         return await ctx.db
             .query("items")
             .withIndex("by_seller", (q) => q.eq("sellerId", userId))
             .order("desc")
-            .paginate(args.paginationOpts);
+            .collect()
     },
 });
 
@@ -164,4 +219,10 @@ export const endAuction = internalMutation({
 
         await ctx.db.patch(args.itemId, updates);
     },
+});
+
+export const generateUploadUrl = mutation({
+  handler: async (ctx) => {
+    return await ctx.storage.generateUploadUrl();
+  },
 });

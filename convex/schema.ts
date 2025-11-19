@@ -6,19 +6,25 @@ const applicationTables = {
     items: defineTable({
         title: v.string(),
         description: v.string(),
-        imageUrl: v.optional(v.string()),
+        imageUrl: v.optional(v.array(v.string())),
+        imageStorageIds: v.optional(v.array(v.id("_storage"))),
         startingPrice: v.number(), // in cents
         lastBidValue: v.number(), // in cents, denormalized
         lastBidderId: v.optional(v.id("users")),
         sellerId: v.id("users"),
         status: v.union(v.literal("draft"), v.literal("live"), v.literal("ended")),
-        startingAt: v.number(),
-        expiringAt: v.number(), // denormalized for quick access
+        startingAt: v.string(),
+        bids: v.array(v.id("bids")),
+        expiringAt: v.string(),
         winnerId: v.optional(v.id("users")),
         category: v.string(),
+        state: v.string(),
+        city: v.string()
     })
         .index("by_status_expiringAt", ["status", "expiringAt"])
         .index("by_seller", ["sellerId"])
+        .index("by_state", ["state"])
+        .index("by_city", ["city"])
         .index("by_category_status", ["category", "status"]),
 
     bids: defineTable({
@@ -51,6 +57,7 @@ const applicationTables = {
             v.literal("endingSoon")
         ),
         fromUserId: v.optional(v.id("users")),
+        seen: v.boolean(),
         toUserId: v.id("users"),
         itemId: v.optional(v.id("items")),
         createdAt: v.string()
@@ -63,9 +70,19 @@ const applicationTables = {
         name: v.string(),
         email: v.optional(v.string()),
         phone: v.optional(v.string()),
+        profileImage: v.optional(v.string()),
         document: v.optional(v.string()),
         items: v.array(v.id("items")),
-        watchlist: v.array(v.id("items"))
+        watchlist: v.array(v.id("items")),
+        address: v.optional(v.object({
+            street: v.string(),
+            number: v.string(),
+            complement: v.optional(v.string()),
+            neighborhood: v.string(),
+            zipCode: v.string(),
+            city: v.string(),
+            state: v.string()
+        }))
     })
 };
 

@@ -10,7 +10,9 @@ import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import OAuthButtons from "../../o-auth-buttons"
+import { useAuthActions } from "@convex-dev/auth/react"
 import { useRouter } from "next/navigation"
+import { useState } from "react"
 
 const loginSchema = z.object({
     email: z.email("Email inválido").trim(),
@@ -18,6 +20,8 @@ const loginSchema = z.object({
 })
 
 export default function LoginForm() {
+    const [serverError, setServerError] = useState<string | null>(null)
+    const { signIn } = useAuthActions()
 
     // Router
     const router = useRouter()
@@ -32,9 +36,25 @@ export default function LoginForm() {
     })
 
     // Submit handler
-    const onSubmitLogin = (data: z.infer<typeof loginSchema>) => {
-        // TODO: Implement login
-        router.push("/")
+    const onSubmitLogin = async (data: z.infer<typeof loginSchema>) => {
+        setServerError(null)
+
+        const formData = new FormData()
+        formData.append("email", data.email)
+        formData.append("password", data.password)
+        formData.append("flow", "signIn")
+
+        try {
+            await signIn("password", formData)
+            router.push("/")
+        } catch (err: unknown) {
+            console.error("Erro no cadastro:", err)
+            if (err instanceof Error) {
+                setServerError(err.message)
+            } else {
+                setServerError("Ocorreu um erro desconhecido")
+            }
+        }
     }
 
     return (
@@ -69,6 +89,11 @@ export default function LoginForm() {
                 <Button type="submit" className="w-full" disabled={loginForm.formState.isSubmitting}>
                     {loginForm.formState.isSubmitting ? <Spinner /> : "Entrar"}
                 </Button>
+                {serverError && (
+                    <p className="text-sm text-center text-red-500 pt-2">
+                        {serverError}
+                    </p>
+                )}
                 <p className="text-sm text-center">
                     Não tem uma conta? <Link href="/register" className="text-primary hover:text-primary/80 font-medium hover:underline">Cadastre-se</Link>
                 </p>

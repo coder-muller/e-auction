@@ -1,5 +1,5 @@
-import { internalMutation, query } from "./_generated/server"
-import { v } from "convex/values"
+import { internalMutation, mutation, query } from "./_generated/server"
+import { ConvexError, v } from "convex/values"
 import { getAuthUserId } from "@convex-dev/auth/server"
 
 export const createNotification = internalMutation({
@@ -23,6 +23,7 @@ export const createNotification = internalMutation({
                 fromUserId,
                 toUserId,
                 type,
+                seen: false,
                 createdAt: new Date().toISOString()
             })
 
@@ -30,11 +31,36 @@ export const createNotification = internalMutation({
     }
 })
 
+export const seeNotifications = mutation({
+    handler: async (ctx) => {
+        const userId = await getAuthUserId(ctx)
+        if (!userId) throw new ConvexError({
+            status: 401,
+            message: "usuário não autenticado"
+        })
+
+        const notifications = await ctx.db.query("notifications")
+            .withIndex("byToUserId", (q) => q.eq("toUserId", userId))
+            .collect()
+
+        const seen = await Promise.all(
+            notifications.map(async (n) => {
+                await ctx.db.patch(n._id, {
+                    seen: true
+                })
+            })
+        )
+
+        return seen
+
+    }
+})
+
 export const getNotifications = query({
     args: {},
     handler: async (ctx) => {
         const userId = await getAuthUserId(ctx)
-        if (!userId) throw new Error("usuário não encontrado")
+        if (!userId) return
 
         const notifications = await ctx.db
             .query("notifications")
@@ -42,6 +68,22 @@ export const getNotifications = query({
             .order("desc")
             .take(20)
 
-        return notifications
+        const notificationsWithItems = await Promise.all(
+            notifications.map(async (n) => {
+                if (!n.itemId) return
+
+                const item = await ctx.db.query("items")
+                    .withIndex("by_id", (q) => q.eq("_id", n.itemId!))
+                    .unique()
+
+                return {
+                    ...n,
+                    item
+                }
+            })
+
+        )
+
+        return notificationsWithItems
     }
 })

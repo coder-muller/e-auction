@@ -14,6 +14,9 @@ import { ImagePreview } from "./image-preview"
 import { toast } from "sonner"
 import type { UseFormReturn } from "react-hook-form"
 import type { AuctionFormValues } from "./schemas"
+import { useMutation } from "convex/react"
+import { api } from "@/convex/_generated/api"
+
 
 interface ImageUploadSectionProps {
   form: UseFormReturn<AuctionFormValues>
@@ -34,8 +37,8 @@ export function ImageUploadSection({
 
       // Validar número máximo de imagens
       const currentImages = form.getValues("images")
-      if (currentImages.length + files.length > 10) {
-        toast.error("Máximo de 10 imagens permitidas")
+      if (currentImages.length + files.length > 1) {
+        toast.error("Máximo de 1 imagens permitidas")
         return
       }
 
@@ -90,7 +93,7 @@ export function ImageUploadSection({
           Imagens do Item
         </CardTitle>
         <CardDescription>
-          Adicione até 10 imagens. A primeira imagem será a principal.
+          Adicione a imagem do anúncio.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -99,7 +102,7 @@ export function ImageUploadSection({
           name="images"
           render={() => (
             <FormItem>
-              <FormLabel>Upload de Imagens</FormLabel>
+              <FormLabel>Upload de Imagem</FormLabel>
               <FormControl>
                 <div className="flex flex-col gap-4">
                   <div className="flex items-center justify-center w-full">
@@ -113,7 +116,7 @@ export function ImageUploadSection({
                           <span className="font-semibold">Clique para fazer upload</span> ou arraste e solte
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          PNG, JPG, WEBP até 5MB cada (máx. 10 imagens)
+                          PNG, JPG, WEBP até 5MB.
                         </p>
                       </div>
                       <input
