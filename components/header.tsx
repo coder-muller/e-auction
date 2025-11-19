@@ -155,7 +155,7 @@ export function Header() {
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem className="hover:text-destructive focus:text-destructive group transition-colors duration-300 cursor-pointer">
-                                <Button onClick={() => handleLogOut()} variant="ghost">
+                                <Button onClick={handleLogOut} variant="ghost">
                                     <LogOut className="group-hover:text-destructive group-focus:text-destructive transition-colors duration-300" />
                                     Sair
                                 </Button>
