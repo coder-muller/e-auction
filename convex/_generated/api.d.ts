@@ -23,6 +23,7 @@ import type * as notifications from "../notifications.js";
 import type * as provider from "../provider.js";
 import type * as realtime from "../realtime.js";
 import type * as router from "../router.js";
+import type * as storage from "../storage.js";
 import type * as users from "../users.js";
 import type * as watchlist from "../watchlist.js";
 
@@ -45,6 +46,7 @@ declare const fullApi: ApiFromModules<{
   provider: typeof provider;
   realtime: typeof realtime;
   router: typeof router;
+  storage: typeof storage;
   users: typeof users;
   watchlist: typeof watchlist;
 }>;

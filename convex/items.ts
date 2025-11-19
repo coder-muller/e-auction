@@ -39,12 +39,22 @@ export const list = query({
 
 export const getAllItems = query({
     handler: async (ctx) => {
-        const items = await ctx.db.query("items")
-            .collect()
-
-        return items
+        const items = await ctx.db.query("items").order("desc").collect();
+        const itemsWithUrl = await Promise.all(
+            items.map(async (item) => {
+                let imageUrl = null;
+                if (item.imageStorageIds && item.imageStorageIds.length > 0) {
+                    imageUrl = await ctx.storage.getUrl(item.imageStorageIds[0]);
+                }
+                return {
+                    ...item,
+                    imageUrl,
+                };
+            })
+        );
+        return itemsWithUrl;
     }
-})
+});
 
 export const getStatics = query({
     args: { itemIds: v.array(v.id("items")) },
@@ -81,6 +91,11 @@ export const getItem = query({
         // Get seller info
         const seller = await ctx.db.get(item.sellerId);
 
+        let imageUrl = null;
+        if (item.imageStorageIds && item.imageStorageIds.length > 0) {
+            imageUrl = await ctx.storage.getUrl(item.imageStorageIds[0]);
+        }
+
         const bids: any = await Promise.all(
             item.bids.map(async (b) => {
                 if (!item.bids) return
@@ -105,6 +120,7 @@ export const getItem = query({
 
         return {
             ...item,
+            imageUrl,
             seller: seller ? { name: seller.name, email: seller.email } : null,
             bids: bids ? { bids: bids } : null,
         };
@@ -120,7 +136,8 @@ export const create = mutation({
         endDate: v.string(),
         endTime: v.string(),
         state: v.string(),
-        city: v.string()
+        city: v.string(),
+        imageStorageIds: v.optional(v.array(v.id("_storage"))),
     },
     handler: async (ctx, args) => {
         const userId = await getAuthUserId(ctx);
@@ -143,7 +160,8 @@ export const create = mutation({
             state: args.state,
             city: args.city,
             category: args.category,
-            bids: []
+            bids: [],
+            imageStorageIds: args.imageStorageIds ?? [],
         });
 
         await ctx.db.patch(userId, {
@@ -201,4 +219,10 @@ export const endAuction = internalMutation({
 
         await ctx.db.patch(args.itemId, updates);
     },
+});
+
+export const generateUploadUrl = mutation({
+  handler: async (ctx) => {
+    return await ctx.storage.generateUploadUrl();
+  },
 });

@@ -14,6 +14,9 @@ import { ImagePreview } from "./image-preview"
 import { toast } from "sonner"
 import type { UseFormReturn } from "react-hook-form"
 import type { AuctionFormValues } from "./schemas"
+import { useMutation } from "convex/react"
+import { api } from "@/convex/_generated/api"
+
 
 interface ImageUploadSectionProps {
   form: UseFormReturn<AuctionFormValues>

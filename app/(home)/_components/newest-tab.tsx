@@ -47,7 +47,7 @@ export function NewestTab({ auctions }: NewestTabProps) {
                     <Card key={auction._id} className="overflow-hidden p-0 hover:shadow-lg transition-shadow">
                         <div className="relative aspect-[4/3] w-full">
                             <Image
-                                src={auction.imageUrl ? auction.imageUrl[0] : "https://placehold.jp/150x150png"}
+                                src={auction.imageUrl || "https://placehold.jp/150x150.png"}
                                 alt={auction.title}
                                 fill
                                 unoptimized

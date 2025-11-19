@@ -7,6 +7,7 @@ const applicationTables = {
         title: v.string(),
         description: v.string(),
         imageUrl: v.optional(v.array(v.string())),
+        imageStorageIds: v.optional(v.array(v.id("_storage"))),
         startingPrice: v.number(), // in cents
         lastBidValue: v.number(), // in cents, denormalized
         lastBidderId: v.optional(v.id("users")),
