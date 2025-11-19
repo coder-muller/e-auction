@@ -145,19 +145,19 @@ export function Header() {
                             <Link href="/new-auction">
                                 <DropdownMenuItem className="group cursor-pointer">
                                     <PlusCircle />
-                                    Create Auction
+                                    Criar Leilão
                                 </DropdownMenuItem>
                             </Link>
                             <DropdownMenuItem onClick={handleToggleTheme} className="group cursor-pointer">
                                 <Sun className="dark:block hidden group-hover:rotate-90 transition-transform duration-300 ease-in-out" />
                                 <Moon className="block dark:hidden group-hover:rotate-360 transition-transform duration-300 ease-in-out" />
-                                Toggle Theme
+                                Trocar Tema
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem className="hover:text-destructive focus:text-destructive group transition-colors duration-300 cursor-pointer">
                                 <Button onClick={() => handleLogOut()} variant="ghost">
                                     <LogOut className="group-hover:text-destructive group-focus:text-destructive transition-colors duration-300" />
-                                    Logout
+                                    Sair
                                 </Button>
                             </DropdownMenuItem>
                         </DropdownMenuContent >
