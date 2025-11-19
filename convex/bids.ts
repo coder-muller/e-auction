@@ -20,11 +20,11 @@ export const placeBid = mutation({
             .first();
 
         if (existingBid?.amount === args.amount) {
-            throw new Error("Lance já realizado.")
+            throw new ConvexError("Lance já realizado.")
         }
 
         const item = await ctx.db.get(args.itemId);
-        if (!item) throw new Error("Item não encontrado");
+        if (!item) throw new ConvexError("Item não encontrado");
 
         const now = Date.now()
 
